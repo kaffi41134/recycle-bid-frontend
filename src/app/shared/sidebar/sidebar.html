@@ -1,0 +1,47 @@
+@if (open()) {
+  <button
+    type="button"
+    class="fixed inset-0 z-30 bg-black/30 lg:hidden"
+    aria-label="關閉選單"
+    (click)="open.set(false)"
+  ></button>
+}
+<aside id="sidebar" class="sidebar" [class.sidebar-open]="open()" aria-label="主要選單">
+  <a routerLink="/materials" class="brand" (click)="open.set(false)">
+    <span>Recycle<br />Bid System</span>
+  </a>
+  <nav class="sidebar-nav relative isolate mt-6 flex flex-col gap-1 px-3">
+    <i
+      class="hl"
+      aria-hidden="true"
+      [class.hl-ready]="highlight().height > 0"
+      [style.top.px]="highlight().top"
+      [style.height.px]="highlight().height"
+    ></i>
+    @for (item of navigation; track item.label) {
+      <div #menuItem class="nav-entry relative z-10" (mouseenter)="moveHighlight(menuItem)">
+        @if (item.label === '回收品項管理') {
+          <a
+            routerLink="/materials"
+            class="nav-item nav-active gap-3"
+            aria-current="page"
+            (click)="open.set(false)"
+          >
+            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0" aria-hidden="true"></svg>
+            <span>{{ item.label }}</span>
+          </a>
+        } @else {
+          <button
+            type="button"
+            class="nav-item w-full gap-3 text-left"
+            disabled
+            title="此功能尚未建置"
+          >
+            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0" aria-hidden="true"></svg>
+            <span>{{ item.label }}</span>
+          </button>
+        }
+      </div>
+    }
+  </nav>
+</aside>

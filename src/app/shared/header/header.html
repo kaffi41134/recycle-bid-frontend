@@ -1,0 +1,49 @@
+<header
+  class="flex h-14 items-center justify-between gap-4 border-b border-[#e0e7e3] bg-white px-4"
+>
+  <div class="flex shrink-0 items-center gap-2 text-xs">
+    <button
+      type="button"
+      class="text-button lg:hidden"
+      aria-label="切換選單"
+      aria-controls="sidebar"
+      [attr.aria-expanded]="sidebarOpen()"
+      (click)="sidebarOpen.set(!sidebarOpen())"
+    >
+      選單
+    </button>
+    <span class="hidden text-slate-500 sm:inline">首頁</span>
+    <span class="hidden text-[#82938c] sm:inline" aria-hidden="true">/</span>
+    <span class="font-medium text-[#163d34]">回收品項管理</span>
+  </div>
+  <form
+    class="relative ml-auto hidden w-full max-w-[270px] md:block"
+    (submit)="search.emit(headerKeyword.value); $event.preventDefault()"
+    role="search"
+  >
+    <svg
+      lucideSearch
+      [size]="14"
+      class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#74877e]"
+      aria-hidden="true"
+    ></svg>
+    <input
+      #headerKeyword
+      type="search"
+      class="h-8 w-full rounded-lg border border-[#e0e7e3] bg-white pl-9 pr-3 text-xs outline-none focus:border-brand"
+      aria-label="搜尋回收品項"
+      placeholder="搜尋品項、分類、關鍵字"
+    />
+  </form>
+  <div class="flex shrink-0 items-center gap-2">
+    <span
+      class="flex size-7 items-center justify-center rounded-full bg-[#e3f3e9] font-bold text-[#16784d]"
+      aria-hidden="true"
+      >王</span
+    >
+    <div class="text-xs leading-tight">
+      <p class="font-semibold">王大明</p>
+      <p class="text-[10px] text-[#74877e]">系統管理員</p>
+    </div>
+  </div>
+</header>

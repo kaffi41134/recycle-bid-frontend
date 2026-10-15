@@ -1,3 +1,63 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@theme {
+  --color-brand: #105337;
+  --color-brand-light: #e0f3e7;
+}
+body {
+  margin: 0;
+  color: #183c36;
+  font-family: 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
+  font-size: 14px;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+a,
+input,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled),
+select {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+:focus-visible {
+  outline: 3px solid #69b990;
+  outline-offset: 3px;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-[#e2ebe6] bg-white shadow-[0_5px_22px_#173f3505];
+  }
+  .field {
+    @apply h-11 w-full rounded-lg border border-[#d9e3dd] bg-white px-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10;
+  }
+  .button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition disabled:opacity-40;
+  }
+  .button-primary {
+    @apply bg-brand text-white hover:bg-[#0b422b];
+  }
+  .button-add {
+    @apply bg-[#13843e] text-white hover:bg-[#0b6f32];
+  }
+  .button-secondary {
+    @apply border border-[#d9e3dd] bg-white text-[#24463b] hover:bg-[#f3f7f5];
+  }
+  .text-button {
+    @apply inline-flex min-h-9 px-2 items-center justify-center rounded-lg hover:bg-slate-100;
+  }
+  .field-label {
+    @apply mb-2 block text-sm font-semibold;
+  }
+}
