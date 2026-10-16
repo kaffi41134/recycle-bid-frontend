@@ -2,18 +2,22 @@
   <button
     type="button"
     class="fixed inset-0 z-30 bg-black/30 lg:hidden"
-    aria-label="關閉選單"
     (click)="open.set(false)"
   ></button>
 }
-<aside id="sidebar" class="sidebar" [class.sidebar-open]="open()" aria-label="主要選單">
+<aside id="sidebar" class="sidebar" [class.sidebar-open]="open()">
   <a routerLink="/materials" class="brand" (click)="open.set(false)">
-    <span>Recycle<br />Bid System</span>
+    <span class="brand-icon">
+      <svg [lucideIcon]="brandIcon" [size]="20"></svg>
+    </span>
+    <span class="brand-text">
+      <span class="brand-title">Recycle Bid</span>
+      <span class="brand-subtitle">SYSTEM MANAGEMENT</span>
+    </span>
   </a>
   <nav class="sidebar-nav relative isolate mt-6 flex flex-col gap-1 px-3">
     <i
       class="hl"
-      aria-hidden="true"
       [class.hl-ready]="highlight().height > 0"
       [style.top.px]="highlight().top"
       [style.height.px]="highlight().height"
@@ -24,10 +28,9 @@
           <a
             routerLink="/materials"
             class="nav-item nav-active gap-3"
-            aria-current="page"
             (click)="open.set(false)"
           >
-            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0" aria-hidden="true"></svg>
+            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
             <span>{{ item.label }}</span>
           </a>
         } @else {
@@ -37,11 +40,18 @@
             disabled
             title="此功能尚未建置"
           >
-            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0" aria-hidden="true"></svg>
+            <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
             <span>{{ item.label }}</span>
           </button>
         }
       </div>
     }
   </nav>
+  <div class="sidebar-user">
+    <span class="user-avatar">王</span>
+    <div>
+      <p class="text-sm font-semibold text-white">王大明</p>
+      <p class="mt-0.5 text-xs text-[#a7c4b8]">系統管理員</p>
+    </div>
+  </div>
 </aside>

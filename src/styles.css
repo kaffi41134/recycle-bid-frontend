@@ -35,12 +35,65 @@ button:disabled {
   outline-offset: 3px;
 }
 
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.search-box,
+.select-input {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #f8faf9;
+  border: 1px solid #e5e7eb;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.select-input {
+  font-size: 13px;
+  color: #111827;
+}
+.search-box input {
+  all: unset;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #111827;
+}
+.search-box input::placeholder {
+  color: #9ca3af;
+}
+.search-box svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+  color: #9ca3af;
+  transition: color .18s ease;
+}
+.search-box:focus-within,
+.select-input:focus-within,
+.field:focus-within {
+  background: #fff;
+  border-color: #0F7B5F;
+}
+.search-box:focus-within svg {
+  color: #0F7B5F;
+}
+.search-box:focus-within,
+.select-input:focus-within {
+  box-shadow: 0 0 0 3px rgb(15 123 95 / 10%);
+}
+.field:focus-visible,
+.select-input:focus-visible {
+  outline: none;
+}
+
 @layer components {
   .panel {
     @apply rounded-2xl border border-[#e2ebe6] bg-white shadow-[0_5px_22px_#173f3505];
   }
   .field {
-    @apply h-11 w-full rounded-lg border border-[#d9e3dd] bg-white px-3 text-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10;
+    @apply h-11 w-full rounded-lg border border-[#d9e3dd] bg-white px-3 text-sm outline-none transition;
   }
   .button {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition disabled:opacity-40;

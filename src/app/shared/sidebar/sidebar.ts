@@ -8,6 +8,7 @@ import {
   LucideGavel,
   LucideLayoutDashboard,
   LucideRecycle,
+  LucideRefreshCcw,
   LucideSettings,
   LucideTrendingUp,
 } from '@lucide/angular';
@@ -20,6 +21,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Sidebar {
+  readonly brandIcon = LucideRefreshCcw;
   readonly open = model(false);
   readonly highlight = signal({ top: 0, height: 0 });
   readonly navigation = [

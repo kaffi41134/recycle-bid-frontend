@@ -1,19 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { LucideChevronRight, LucideHouse, LucideMenu } from '@lucide/angular';
 import { Sidebar } from './shared/sidebar/sidebar';
-import { Header } from './shared/header/header';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Sidebar, Header],
+  imports: [RouterOutlet, Sidebar, LucideChevronRight, LucideHouse, LucideMenu],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
-  private readonly router = inject(Router);
   readonly sidebarOpen = signal(false);
-
-  search(keyword: string) {
-    this.router.navigate(['/materials'], { queryParams: { keyword: keyword.trim() || null } });
-  }
 }

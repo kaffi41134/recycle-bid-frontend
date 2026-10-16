@@ -1,9 +1,21 @@
-<section class="mb-4 flex items-end justify-between gap-4" aria-labelledby="page-title">
-  <div>
-    <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-[#102e28]">
-      回收品項管理
-    </h1>
-    <p class="text-xs leading-5 text-[#74877e]">管理廢銅、廢鐵等回收品項資料</p>
+<section
+  class="mb-5 flex flex-wrap items-center justify-between gap-4"
+  aria-labelledby="page-title"
+>
+  <div class="min-w-0">
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-[#0f172a]">
+        回收品項管理
+      </h1>
+      <span
+        class="rounded-full border border-[#a7f3d0] bg-[#ecfdf5] px-2 py-0.5 text-[11px] font-medium leading-4 text-[#047857]"
+      >
+        啟用中: {{ enabledCount() }} / {{ materials().length }} 項
+      </span>
+    </div>
+    <p class="mt-1 text-xs leading-5 text-[#64748b]">
+      管理各類廢銅、廢鋁、廢鋼鐵與貴金屬回收標的之規格設定與即時計價基準。
+    </p>
   </div>
   <button
     type="button"
@@ -11,26 +23,20 @@
     [disabled]="loading() || !!error()"
     (click)="openCreate()"
   >
-    <svg lucidePlus [size]="16" aria-hidden="true"></svg>新增品項
+    <svg lucidePlus [size]="16"></svg>新增品項
   </button>
 </section>
 
-<section class="materials-panel" aria-labelledby="list-title" [attr.aria-busy]="loading()">
+<section aria-labelledby="list-title" [attr.aria-busy]="loading()">
   <h2 id="list-title" class="sr-only">回收品項列表</h2>
-  <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()" aria-label="品項查詢">
+  <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
     <div class="min-w-0 flex-1">
       <label for="keyword" class="sr-only">關鍵字搜尋</label>
-      <div class="relative">
-        <svg
-          lucideSearch
-          [size]="16"
-          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#74877e]"
-          aria-hidden="true"
-        ></svg>
+      <div class="search-box">
+        <svg lucideSearch [size]="17"></svg>
         <input
           id="keyword"
           type="search"
-          class="filter-keyword"
           formControlName="keyword"
           placeholder="輸入品項名稱或代碼"
         />
@@ -38,8 +44,8 @@
     </div>
     <div class="filter-select">
       <label for="category">分類</label
-      ><select id="category" formControlName="category">
-        <option value="">全部</option>
+      ><select id="category" class="select-input" formControlName="category">
+        <option value="">全部類別</option>
         @for (category of categories; track category) {
           <option [value]="category">{{ category }}</option>
         }
@@ -47,193 +53,169 @@
     </div>
     <div class="filter-select">
       <label for="status">狀態</label
-      ><select id="status" formControlName="status">
-        <option value="">全部</option>
+      ><select id="status" class="select-input" formControlName="status">
+        <option value="">全部狀態</option>
         <option value="enabled">啟用</option>
         <option value="disabled">停用</option>
       </select>
     </div>
     <button type="button" class="reset-button" (click)="resetSearch()">
-      <svg lucideRotateCw [size]="15" aria-hidden="true"></svg>重設
+      <svg lucideRotateCw [size]="15"></svg>重設
     </button>
-    <span class="whitespace-nowrap text-[11px] text-[#74877e]"
-      >共 {{ filteredMaterials().length }} 筆資料</span
+    <span class="whitespace-nowrap text-[13px] text-[#64748b]"
+      >篩選結果:
+      <strong class="font-bold text-[#334155]">{{ filteredMaterials().length }}</strong>
+      筆資料</span
     >
   </form>
 
-  @if (message()) {
-    <div
-      class="m-3 flex items-center justify-between rounded-lg bg-brand-light px-4 py-3 text-brand"
-      role="status"
-    >
-      <span>{{ message() }}</span
-      ><button type="button" class="text-button" aria-label="關閉提示" (click)="message.set('')">
-        關閉
-      </button>
-    </div>
-  }
-
-  @if (error()) {
-    <div
-      class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
-      role="alert"
-    >
-      <p>{{ error() }}</p>
-      <button type="button" class="button button-secondary" (click)="loadMaterials()">
-        重新載入
-      </button>
-    </div>
-  } @else {
-    <div class="overflow-x-auto">
-      <table class="material-table w-full min-w-[780px] text-left">
-        <thead>
-          <tr>
-            <th scope="col">品項代碼</th>
-            <th scope="col">品項名稱</th>
-            <th scope="col">分類</th>
-            <th scope="col">單位</th>
-            <th scope="col">狀態</th>
-            <th scope="col">建立時間</th>
-            <th scope="col">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (loading()) {
+  <div class="materials-panel">
+    @if (error()) {
+      <div
+        class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
+        role="alert"
+      >
+        <p>{{ error() }}</p>
+        <button type="button" class="button button-secondary" (click)="loadMaterials()">
+          重新載入
+        </button>
+      </div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="material-table w-full min-w-[780px] text-left">
+          <thead>
             <tr>
-              <td colspan="7" class="!py-14 text-center text-slate-500" role="status">
-                正在載入品項資料…
-              </td>
+              <th scope="col">品項代碼</th>
+              <th scope="col">品項名稱</th>
+              <th scope="col">分類</th>
+              <th scope="col">計價單位</th>
+              <th scope="col">狀態</th>
+              <th scope="col">建立時間</th>
+              <th scope="col">操作</th>
             </tr>
-          } @else {
-            @for (item of visibleMaterials(); track item.id) {
+          </thead>
+          <tbody>
+            @if (loading()) {
               <tr>
-                <td class="text-[#45695b]">{{ item.code }}</td>
-                <td>
-                  <div class="flex items-center gap-2">
-                    <span
-                      class="category-icon"
-                      [class.category-paper]="item.category === '紙類'"
-                      [class.category-plastic]="item.category === '塑膠類'"
-                      [class.category-glass]="item.category === '玻璃類'"
-                      aria-hidden="true"
-                      >{{ item.category.slice(0, 1) }}</span
-                    ><span class="font-medium text-[#102e28]">{{ item.name }}</span>
-                  </div>
-                </td>
-                <td>
-                  <span
-                    class="category-badge"
-                    [class.category-paper]="item.category === '紙類'"
-                    [class.category-plastic]="item.category === '塑膠類'"
-                    [class.category-glass]="item.category === '玻璃類'"
-                    >{{ item.category }}</span
-                  >
-                </td>
-                <td>{{ item.unit }}</td>
-                <td>
-                  <span class="status-badge" [class.status-disabled]="!item.enabled"
-                    ><span class="size-1.5 rounded-full bg-current"></span
-                    >{{ item.enabled ? '啟用' : '停用' }}</span
-                  >
-                </td>
-                <td class="whitespace-nowrap tabular-nums">
-                  <time [attr.datetime]="item.createdAt">{{
-                    item.createdAt ? (item.createdAt | date: 'yyyy-MM-dd HH:mm') : '—'
-                  }}</time>
-                </td>
-                <td>
-                  <div class="flex gap-2">
-                    <button
-                      type="button"
-                      class="action-button"
-                      [attr.title]="'編輯' + item.name"
-                      [attr.aria-label]="'編輯' + item.name"
-                      (click)="openEdit(item)"
-                    >
-                      <svg lucidePencil [size]="14" aria-hidden="true"></svg></button
-                    ><button
-                      type="button"
-                      class="action-button action-delete"
-                      [attr.title]="'刪除' + item.name"
-                      [attr.aria-label]="'刪除' + item.name"
-                      (click)="askDelete(item)"
-                    >
-                      <svg lucideTrash [size]="14" aria-hidden="true"></svg>
-                    </button>
-                  </div>
+                <td colspan="7" class="!py-14 text-center text-slate-500" role="status">
+                  正在載入品項資料…
                 </td>
               </tr>
-            } @empty {
-              <tr>
-                <td colspan="7" class="!py-14 text-center">
-                  <p class="mt-3 font-medium">沒有符合條件的品項</p>
-                  <p class="mt-1 text-xs text-[#73867c]">請調整查詢條件，或新增第一筆回收品項。</p>
-                </td>
-              </tr>
+            } @else {
+              @for (item of visibleMaterials(); track item.id) {
+                <tr [class.material-disabled]="!item.enabled">
+                  <td class="material-code">{{ item.code }}</td>
+                  <td>
+                    <div class="flex items-center gap-2">
+                      <span
+                        class="category-icon"
+                        [class.category-metal]="item.category === '金屬類'"
+                        >{{ item.category.slice(0, 1) }}</span
+                      ><span class="font-semibold text-[#0f172a]">{{ item.name }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="category-badge">{{ item.category }}</span>
+                  </td>
+                  <td>{{ item.unit }}</td>
+                  <td>
+                    <span class="status-badge" [class.status-disabled]="!item.enabled"
+                      ><span class="size-1.5 rounded-full bg-current"></span
+                      >{{ item.enabled ? '啟用' : '停用' }}</span
+                    >
+                  </td>
+                  <td class="material-date">
+                    <time [attr.datetime]="item.createdAt">{{
+                      item.createdAt ? (item.createdAt | date: 'yyyy-MM-dd HH:mm') : '—'
+                    }}</time>
+                  </td>
+                  <td>
+                    <div class="flex gap-2">
+                      <button
+                        type="button"
+                        class="action-button"
+                        [attr.title]="'編輯' + item.name"
+                        (click)="openEdit(item)"
+                      >
+                        <svg lucidePencil [size]="14"></svg></button
+                      ><button
+                        type="button"
+                        class="action-button action-delete"
+                        [attr.title]="'刪除' + item.name"
+                        (click)="askDelete(item)"
+                      >
+                        <svg lucideTrash [size]="14"></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="!py-14 text-center">
+                    <p class="mt-3 font-medium">沒有符合條件的品項</p>
+                    <p class="mt-1 text-sm text-[#73867c]">
+                      請調整查詢條件，或新增第一筆回收品項。
+                    </p>
+                  </td>
+                </tr>
+              }
             }
-          }
-        </tbody>
-      </table>
-    </div>
-    <footer
-      class="flex flex-wrap items-center justify-between gap-3 px-3.5 py-2.5 text-[11px] text-[#74877e]"
-    >
-      <p>
-        顯示第 {{ firstRecord() }} – {{ lastRecord() }} 筆，共
-        {{ filteredMaterials().length }} 筆資料
-      </p>
-      <div class="flex flex-wrap items-center gap-1.5">
-        <label for="page-size" class="sr-only">每頁筆數</label
-        ><select
-          #pageSizeSelect
-          id="page-size"
-          class="h-7 rounded-lg border border-[#e0e7e3] bg-white px-2 text-[#74877e]"
-          [value]="pageSize()"
-          (change)="changePageSize(pageSizeSelect.value)"
-        >
-          <option value="5">每頁 5 筆</option>
-          <option value="10">每頁 10 筆</option>
-          <option value="20">每頁 20 筆</option>
-        </select>
-        <nav class="flex gap-1.5" aria-label="列表分頁">
-          @if (pageCount() > 1) {
+          </tbody>
+        </table>
+      </div>
+      <footer
+        class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 text-[13px] text-[#64748b]"
+      >
+        <p>
+        顯示第 <strong class="font-bold">{{ firstRecord() }}</strong> –
+        <strong class="font-bold">{{ lastRecord() }}</strong> 筆，共
+        <strong class="font-bold">{{ filteredMaterials().length }}</strong> 筆資料
+        </p>
+        <div class="flex flex-wrap items-center gap-3">
+          <label for="page-size">每頁顯示</label
+          ><select
+            #pageSizeSelect
+            id="page-size"
+            class="select-input"
+            [value]="pageSize()"
+            (change)="changePageSize(pageSizeSelect.value)"
+          >
+            <option value="5">每頁 5 筆</option>
+            <option value="10">每頁 10 筆</option>
+            <option value="20">每頁 20 筆</option>
+          </select>
+          <nav class="pagination">
             <button
               type="button"
               class="page-button"
-              aria-label="上一頁"
               [disabled]="currentPage() === 1"
               (click)="page.set(currentPage() - 1)"
             >
-              上一頁
+              <svg lucideChevronLeft [size]="14"></svg>
             </button>
-          }
-          @for (number of pageNumbers(); track number) {
+            @for (number of pageNumbers(); track number) {
+              <button
+                type="button"
+                class="page-button"
+                [class.page-active]="number === currentPage()"
+                (click)="page.set(number)"
+              >
+                {{ number }}
+              </button>
+            }
             <button
               type="button"
               class="page-button"
-              [class.page-active]="number === currentPage()"
-              [attr.aria-current]="number === currentPage() ? 'page' : null"
-              [attr.aria-label]="'第 ' + number + ' 頁'"
-              (click)="page.set(number)"
-            >
-              {{ number }}
-            </button>
-          }
-          @if (pageCount() > 1) {
-            <button
-              type="button"
-              class="page-button"
-              aria-label="下一頁"
               [disabled]="currentPage() === pageCount()"
               (click)="page.set(currentPage() + 1)"
             >
-              下一頁
+              <svg lucideChevronRight [size]="14"></svg>
             </button>
-          }
-        </nav>
-      </div>
-    </footer>
-  }
+          </nav>
+        </div>
+      </footer>
+    }
+  </div>
 </section>
 
 <dialog
@@ -248,7 +230,6 @@
       <button
         type="button"
         class="text-button"
-        aria-label="關閉表單"
         [disabled]="saving()"
         (click)="closeEditor()"
       >

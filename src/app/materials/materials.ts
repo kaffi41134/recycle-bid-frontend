@@ -18,6 +18,8 @@ import { finalize } from 'rxjs';
 import { Material, MATERIAL_CATEGORIES } from './material.model';
 import { MaterialService } from './material.service';
 import {
+  LucideChevronLeft,
+  LucideChevronRight,
   LucidePencil,
   LucidePlus,
   LucideRotateCw,
@@ -30,6 +32,8 @@ import {
   imports: [
     ReactiveFormsModule,
     DatePipe,
+    LucideChevronLeft,
+    LucideChevronRight,
     LucidePencil,
     LucidePlus,
     LucideRotateCw,
@@ -50,13 +54,13 @@ export class Materials implements OnInit {
 
   readonly categories = MATERIAL_CATEGORIES;
   readonly materials = signal<Material[]>([]);
+  readonly enabledCount = computed(() => this.materials().filter((item) => item.enabled).length);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly deleting = signal(false);
   readonly error = signal('');
   readonly formError = signal('');
   readonly deleteError = signal('');
-  readonly message = signal('');
   readonly editing = signal<Material | null>(null);
   readonly pendingDelete = signal<Material | null>(null);
   readonly page = signal(1);
@@ -193,7 +197,6 @@ export class Materials implements OnInit {
               : [saved, ...items],
           );
           if (!editing) this.resetSearch();
-          this.message.set(editing ? '品項已更新' : '品項已新增');
           this.editor().nativeElement.close();
         },
         error: (error: HttpErrorResponse) => this.formError.set(this.errorMessage(error)),
@@ -225,7 +228,6 @@ export class Materials implements OnInit {
         next: () => {
           this.materials.update((items) => items.filter((entry) => entry.id !== item.id));
           this.page.set(this.currentPage());
-          this.message.set(`已刪除「${item.name}」`);
           this.deleteDialog().nativeElement.close();
         },
         error: (error: HttpErrorResponse) => this.deleteError.set(this.errorMessage(error)),

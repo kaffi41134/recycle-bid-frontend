@@ -20,6 +20,6 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('[aria-current="page"]')?.textContent).toContain('回收品項管理');
+    expect(compiled.querySelector('.nav-active')?.textContent).toContain('回收品項管理');
   });
 });
