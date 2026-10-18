@@ -5,7 +5,13 @@
     (click)="open.set(false)"
   ></button>
 }
-<aside id="sidebar" class="sidebar" [class.sidebar-open]="open()">
+<aside
+  id="sidebar"
+  class="sidebar"
+  [class.sidebar-open]="open()"
+  [class.sidebar-collapsed]="collapsed()"
+  (keydown.escape)="open.set(false)"
+>
   <a routerLink="/materials" class="brand" (click)="open.set(false)">
     <span class="brand-icon">
       <svg [lucideIcon]="brandIcon" [size]="20"></svg>
@@ -24,10 +30,12 @@
     ></i>
     @for (item of navigation; track item.label) {
       <div #menuItem class="nav-entry relative z-10" (mouseenter)="moveHighlight(menuItem)">
-        @if (item.label === '回收品項管理') {
+        @if (item.label === '回收品項管理' || item.label === '投標案件管理') {
           <a
-            routerLink="/materials"
-            class="nav-item nav-active gap-3"
+            [routerLink]="item.label === '投標案件管理' ? '/bids' : '/materials'"
+            routerLinkActive="nav-active"
+            ariaCurrentWhenActive="page"
+            class="nav-item gap-3"
             (click)="open.set(false)"
           >
             <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>

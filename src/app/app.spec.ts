@@ -1,12 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([
+          { path: 'materials', children: [] },
+          { path: 'bids', children: [] },
+        ]),
+      ],
     }).compileComponents();
   });
 
@@ -18,6 +23,7 @@ describe('App', () => {
 
   it('should render the navigation', async () => {
     const fixture = TestBed.createComponent(App);
+    await TestBed.inject(Router).navigateByUrl('/materials');
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.nav-active')?.textContent).toContain('回收品項管理');

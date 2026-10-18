@@ -1,14 +1,22 @@
 <div class="min-h-screen bg-[#f3f6f4]">
-  <app-sidebar [(open)]="sidebarOpen" />
-  <div class="lg:ml-[230px]">
+  <app-sidebar [(open)]="sidebarOpen" [collapsed]="sidebarCollapsed()" />
+  <div class="app-content" [class.sidebar-collapsed]="sidebarCollapsed()">
     <main class="mx-auto max-w-[1600px] px-6 py-6">
       <div class="mb-4 flex items-center gap-2">
         <button
           type="button"
           class="text-button lg:hidden"
-          aria-controls="sidebar"
           [attr.aria-expanded]="sidebarOpen()"
           (click)="sidebarOpen.set(!sidebarOpen())"
+        >
+          <svg lucideMenu [size]="20"></svg>
+        </button>
+        <button
+          type="button"
+          class="text-button hidden lg:inline-flex"
+          [attr.aria-expanded]="!sidebarCollapsed()"
+          [title]="sidebarCollapsed() ? '展開側邊選單' : '收合側邊選單'"
+          (click)="sidebarCollapsed.set(!sidebarCollapsed())"
         >
           <svg lucideMenu [size]="20"></svg>
         </button>
@@ -18,7 +26,7 @@
             首頁
           </span>
           <svg lucideChevronRight [size]="12" class="text-[#d1d5db]"></svg>
-          <span class="text-[#1f2937]">回收品項管理</span>
+          <span class="text-[#1f2937]">{{ pageTitle() }}</span>
         </nav>
       </div>
       <router-outlet />

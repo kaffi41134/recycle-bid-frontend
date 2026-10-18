@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, model, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, input, model, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideBarcode,
   LucideChartColumn,
@@ -15,7 +15,7 @@ import {
 
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterLink, LucideDynamicIcon],
+  imports: [RouterLink, RouterLinkActive, LucideDynamicIcon],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +23,7 @@ import {
 export class Sidebar {
   readonly brandIcon = LucideRefreshCcw;
   readonly open = model(false);
+  readonly collapsed = input(false);
   readonly highlight = signal({ top: 0, height: 0 });
   readonly navigation = [
     { label: 'Dashboard', icon: LucideLayoutDashboard },

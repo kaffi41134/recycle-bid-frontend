@@ -1,0 +1,206 @@
+.bids-panel {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.filter-select label {
+  color: #64748b;
+}
+.filter-select select {
+  min-width: 84px;
+}
+.add-bid,
+.reset-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 7px;
+  font-size: 14px;
+  transition: background 150ms;
+}
+.add-bid {
+  background: #047857;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+.add-bid:hover:not(:disabled) {
+  background: #065f46;
+}
+.add-bid:disabled {
+  opacity: 0.4;
+}
+.reset-button {
+  font-size: 13px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+}
+.reset-button:hover {
+  background: #f1f5f9;
+}
+@media (max-width: 639px) {
+  .filter-bar > :first-child {
+    flex-basis: 100%;
+  }
+}
+.bid-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  color: #334155;
+}
+.bid-table th {
+  height: 44px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.bid-table th:last-child {
+  text-align: left;
+}
+.bid-table td:last-child > div {
+  justify-content: flex-start;
+}
+.bid-table td {
+  height: 52px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.bid-table tbody tr:hover {
+  background: #f8fafc;
+}
+.bid-date {
+  font-variant-numeric: tabular-nums;
+}
+.bid-code {
+  color: #155e75;
+}
+.bid-date {
+  color: #64748b;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 28px;
+  border-radius: 5px;
+  color: #94a3b8;
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.action-button:hover {
+  background: #e3f3e9;
+  color: #197e50;
+}
+.action-delete:hover {
+  background: #fef2f2;
+  color: #c34c4c;
+}
+.pagination {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+.page-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 0 8px;
+  height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  color: #64748b;
+}
+.page-button + .page-button {
+  border-left: 1px solid #f1f5f9;
+}
+.page-button:hover:not(:disabled) {
+  background: #eef6f0;
+}
+.page-button:disabled {
+  opacity: 0.35;
+}
+.page-button.page-active {
+  background: #047857;
+  color: #fff;
+  font-weight: 600;
+}
+.form-dialog {
+  width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid #d9e3dd;
+  border-radius: 16px;
+  background: #fff;
+  color: #183c36;
+  box-shadow: 0 24px 80px #102f2c30;
+}
+.form-dialog::backdrop {
+  background: #102f2c66;
+  backdrop-filter: blur(3px);
+}
+
+.form-dialog {
+  width: min(760px, calc(100vw - 32px));
+}
+.bid-table td {
+  white-space: nowrap;
+}
+.bid-table td.bid-description {
+  min-width: 180px;
+  max-width: 300px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.bid-table th:last-child,
+.bid-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -1px 0 #e2e8f0;
+}
+.bid-table th:last-child {
+  background: #f8fafc;
+}
+
+/* 寬表格在窄螢幕下，讓空資料與載入提示仍出現在可見範圍。 */
+.bid-table td[colspan] {
+  text-align: left;
+  padding-left: 24px;
+}

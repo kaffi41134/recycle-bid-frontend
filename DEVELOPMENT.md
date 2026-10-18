@@ -66,3 +66,19 @@ HTTP 使用 Observable 訂閱來處理回應與錯誤；元件銷毀時會取消
 
 Controller 測試使用 MockMvc 與模擬 Service；時間測試驗證 DTO 映射及修改時保留原值。
 `MaterialPersistenceTests` 使用獨立 H2 記憶體資料庫驗證 Hibernate 自動產生時間。
+
+
+## 投標案件管理
+
+從左側「投標案件管理」進入 `/bids`。沿用既有頁面樣式，提供列表、全欄位關鍵字搜尋、
+前端分頁、新增／編輯表單與刪除確認視窗。寬表格可左右捲動，操作欄固定於右側。
+
+- `src/app/bids/bids.*`：案件列表、表單、互動與測試。
+- `src/app/bids/bid.model.ts`：對應目前後端 `BidReq`／`BidRes`。
+- `src/app/bids/bid.service.ts`：串接 `/api/bids` 的 GET、POST、PUT、DELETE。
+
+標售案號依目前後端契約為必填輸入；其餘欄位選填，空白以 null 傳送。
+數量允許小數，零保留為零。兩個日期皆填寫時，截止日不得早於通知日；同日允許。
+後端目前沒有狀態欄位或自動編號，因此前端沒有加入這兩個功能。
+載入錯誤提供重試；新增、修改與刪除只有在 API 成功後才更新畫面，失敗保留資料及輸入。
+驗證使用 `npm run build` 與 `npm test -- --watch=false`，HTTP 測試不會修改真實案件。
