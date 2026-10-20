@@ -1,0 +1,164 @@
+<dialog #dialog class="import-dialog" (cancel)="close(); $event.preventDefault()">
+  <div class="flex max-h-[calc(100dvh-32px)] flex-col">
+    <header
+      class="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4"
+    >
+      <div>
+        <h2 class="text-xl font-bold">查詢標案公告</h2>
+        <p class="mt-1 text-xs text-slate-500">
+          查詢公告後，點選一筆公告，將全部明細帶入下方欄位。
+        </p>
+      </div>
+      <button type="button" class="text-button shrink-0" (click)="close()">關閉</button>
+    </header>
+    <div class="min-h-0 space-y-5 overflow-y-auto p-6">
+      <form [formGroup]="queryForm" (ngSubmit)="search()">
+        <fieldset
+          class="grid items-start gap-4 sm:grid-cols-[1fr_1fr_auto]"
+          [disabled]="searching()"
+        >
+          <div>
+            <label for="import-unit" class="field-label"
+              >招標機關代碼 <span class="text-red-600">*</span></label
+            >
+            <input
+              id="import-unit"
+              class="field input-control"
+              formControlName="unitId"
+              placeholder="請輸入機關代碼"
+            />
+            @if (queryForm.controls.unitId.touched && queryForm.controls.unitId.invalid) {
+              <p class="mt-1 text-xs text-red-600">請輸入招標機關代碼。</p>
+            }
+          </div>
+          <div>
+            <label for="import-job" class="field-label"
+              >標案案號 <span class="text-red-600">*</span></label
+            >
+            <input
+              id="import-job"
+              class="field input-control"
+              formControlName="jobNumber"
+              placeholder="請輸入完整標案案號"
+            />
+            @if (queryForm.controls.jobNumber.touched && queryForm.controls.jobNumber.invalid) {
+              <p class="mt-1 text-xs text-red-600">請輸入標案案號。</p>
+            }
+          </div>
+          <button
+            type="submit"
+            class="button dialog-button button-primary sm:mt-7"
+            [disabled]="searching()"
+          >
+            <svg lucideSearch [size]="16"></svg>{{ searching() ? '查詢中…' : '查詢公告' }}
+          </button>
+        </fieldset>
+      </form>
+      @if (error()) {
+        <p class="rounded-lg bg-red-50 p-3 text-red-700" role="alert">
+          {{ error() }} 請調整條件或再次查詢。
+        </p>
+      }
+      @if (searching()) {
+        <p class="py-6 text-center text-slate-500" role="status">正在查詢公告清單…</p>
+      } @else if (searched()) {
+        <section>
+          <h3 class="mb-3 font-semibold">
+            公告清單
+            <span class="text-sm font-normal text-slate-500">共 {{ notices().length }} 筆</span>
+          </h3>
+          <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="w-full min-w-[600px] text-left text-sm">
+              <thead class="bg-slate-50 text-xs text-slate-600">
+                <tr>
+                  <th scope="col" class="p-3">公告日期</th>
+                  <th scope="col" class="p-3">公告類型</th>
+                  <th scope="col" class="p-3">標案名稱</th>
+                  <th scope="col" class="p-3">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (notice of notices(); track $index) {
+                  <tr
+                    class="cursor-pointer border-t border-slate-100 hover:bg-brand-light/40"
+                    [class.bg-brand-light]="selected() === notice"
+                    (click)="selectNotice(notice)"
+                  >
+                    <td class="whitespace-nowrap p-3">{{ notice.noticeDate || '—' }}</td>
+                    <td class="p-3">{{ notice.noticeType || '—' }}</td>
+                    <td class="p-3">{{ notice.title || '—' }}</td>
+                    <td class="whitespace-nowrap p-3">
+                      <button
+                        type="button"
+                        class="text-button text-brand"
+                        (click)="$event.stopPropagation(); selectNotice(notice)"
+                      >
+                        {{ selected() === notice ? '重新帶入' : '帶入明細' }}
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="4" class="p-8 text-center text-slate-500">
+                      查無公告，請確認機關代碼與標案案號後重新查詢。
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+      @if (selected(); as notice) {
+        <section class="border-t border-slate-200 pt-5">
+          <h3 class="font-semibold">公告明細</h3>
+          <p class="mt-1 mb-4 text-xs text-slate-500">
+            {{ notice.noticeDate }} · {{ notice.noticeType }} · {{ notice.title }}
+          </p>
+          @if (loadingDetail()) {
+            <p class="py-6 text-center text-slate-500" role="status">正在載入並帶入公告明細…</p>
+          } @else if (detailError()) {
+            <div
+              class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-3 text-red-700"
+              role="alert"
+            >
+              <p>{{ detailError() }}</p>
+              <button type="button" class="button button-secondary" (click)="selectNotice(notice)">
+                重試
+              </button>
+            </div>
+          } @else if (detailLoaded()) {
+            <div [formGroup]="detailForm" class="grid gap-4 sm:grid-cols-2">
+              @for (field of fields; track field.key) {
+                <div
+                  class="min-w-0"
+                  [class.sm:col-span-2]="field.key === 'title' || field.key === 'sourceUrl'"
+                >
+                  <label [for]="'import-detail-' + field.key" class="field-label">{{
+                    field.label
+                  }}</label>
+                  <input
+                    [id]="'import-detail-' + field.key"
+                    class="field input-control"
+                    [formControlName]="field.key"
+                    placeholder="未提供"
+                  />
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+    <footer
+      class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4"
+    >
+      <p class="text-xs text-slate-500">
+        目前僅查詢與帶入欄位，尚未儲存案件；關閉後不保留本次資料。
+      </p>
+      <button type="button" class="button dialog-button button-secondary" (click)="close()">
+        關閉
+      </button>
+    </footer>
+  </div>
+</dialog>

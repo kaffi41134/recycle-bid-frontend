@@ -1,11 +1,26 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Bid, BidRequest } from './bid.model';
+import {
+  Bid,
+  BidRequest,
+  BidNoticeRequest,
+  BidNotice,
+  BidDetailRequest,
+  BidImportDetail,
+} from './bid.model';
 
 @Injectable({ providedIn: 'root' })
 export class BidService {
   private readonly http = inject(HttpClient);
   private readonly url = '/api/bids';
+
+  findNotices(request: BidNoticeRequest) {
+    return this.http.post<BidNotice[]>(`${this.url}/import/notices`, request);
+  }
+
+  findNoticeDetail(request: BidDetailRequest) {
+    return this.http.post<BidImportDetail>(`${this.url}/import/detail`, request);
+  }
 
   findAll() {
     return this.http.get<Bid[]>(this.url);

@@ -1,0 +1,58 @@
+<footer
+  class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 text-[13px] text-[#64748b]"
+>
+  <p>
+    顯示第 <strong class="font-bold">{{ firstRecord() }}</strong> –
+    <strong class="font-bold">{{ lastRecord() }}</strong> 筆，共
+    <strong class="font-bold">{{ totalItems() }}</strong> 筆資料
+  </p>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <label class="flex items-center gap-3">
+      每頁顯示
+      <select
+        class="select-input input-control"
+        [value]="pageSize()"
+        (change)="changePageSize($event)"
+      >
+        @for (size of pageSizeOptions(); track size) {
+          <option [value]="size">每頁 {{ size }} 筆</option>
+        }
+      </select>
+    </label>
+
+    <nav class="pagination">
+      <button
+        type="button"
+        class="page-button"
+        [disabled]="currentPage() === 1"
+        aria-label="上一頁"
+        (click)="goToPage(currentPage() - 1)"
+      >
+        <svg lucideChevronLeft [size]="14"></svg>
+      </button>
+
+      @for (number of pageNumbers(); track number) {
+        <button
+          type="button"
+          class="page-button"
+          [class.page-active]="number === currentPage()"
+          [attr.aria-current]="number === currentPage() ? 'page' : null"
+          (click)="goToPage(number)"
+        >
+          {{ number }}
+        </button>
+      }
+
+      <button
+        type="button"
+        class="page-button"
+        [disabled]="currentPage() === pageCount()"
+        aria-label="下一頁"
+        (click)="goToPage(currentPage() + 1)"
+      >
+        <svg lucideChevronRight [size]="14"></svg>
+      </button>
+    </nav>
+  </div>
+</footer>

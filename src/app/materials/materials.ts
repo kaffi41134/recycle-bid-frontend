@@ -17,14 +17,15 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { Material, MATERIAL_CATEGORIES } from './material.model';
 import { MaterialService } from './material.service';
+import { Pagination } from '../shared/pagination/pagination';
 import {
-  LucideChevronLeft,
-  LucideChevronRight,
+  LucideFileCheck,
   LucidePencil,
   LucidePlus,
   LucideRotateCw,
   LucideSearch,
   LucideTrash,
+  LucideX,
 } from '@lucide/angular';
 
 @Component({
@@ -32,13 +33,14 @@ import {
   imports: [
     ReactiveFormsModule,
     DatePipe,
-    LucideChevronLeft,
-    LucideChevronRight,
+    Pagination,
+    LucideFileCheck,
     LucidePencil,
     LucidePlus,
     LucideRotateCw,
     LucideSearch,
     LucideTrash,
+    LucideX,
   ],
   templateUrl: './materials.html',
   styleUrl: './materials.css',
@@ -97,16 +99,6 @@ export class Materials implements OnInit {
     const start = (this.currentPage() - 1) * this.pageSize();
     return this.filteredMaterials().slice(start, start + this.pageSize());
   });
-  readonly firstRecord = computed(() =>
-    this.filteredMaterials().length ? (this.currentPage() - 1) * this.pageSize() + 1 : 0,
-  );
-  readonly lastRecord = computed(() =>
-    Math.min(this.currentPage() * this.pageSize(), this.filteredMaterials().length),
-  );
-  readonly pageNumbers = computed(() => {
-    const start = Math.max(1, Math.min(this.currentPage() - 2, this.pageCount() - 4));
-    return Array.from({ length: Math.min(5, this.pageCount()) }, (_, index) => start + index);
-  });
 
   ngOnInit() {
     this.searchForm.valueChanges
@@ -142,11 +134,6 @@ export class Materials implements OnInit {
   resetSearch() {
     this.searchForm.reset();
     this.search();
-  }
-
-  changePageSize(value: string) {
-    this.pageSize.set(Number(value));
-    this.page.set(1);
   }
 
   openCreate() {

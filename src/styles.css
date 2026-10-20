@@ -35,23 +35,51 @@ button:disabled {
   outline-offset: 3px;
 }
 
+.input-control {
+  box-sizing: border-box;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid;
+  border-radius: 10px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.input-control:focus-within {
+  background: #fff;
+  border-color: #0f7b5f;
+  box-shadow: 0 0 0 3px rgb(15 123 95 / 10%);
+}
+.input-control:focus-visible {
+  outline: none;
+}
 .search-box {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-.search-box,
-.select-input {
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 10px;
   background: #f8faf9;
-  border: 1px solid #e5e7eb;
-  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease;
+  border-color: #e5e7eb;
 }
 .select-input {
+  background: #f8faf9;
+  border-color: #e5e7eb;
   font-size: 13px;
   color: #111827;
+}
+.field {
+  width: 100%;
+  background: #fff;
+  border-color: var(--field-border, #d9e3dd);
+  color: inherit;
+  font-size: 14px;
+}
+.field::placeholder {
+  color: #9aaba4;
+}
+.bid-editor .field {
+  min-width: 0;
+  --field-border: #c1d1c9;
 }
 .search-box input {
   all: unset;
@@ -70,36 +98,53 @@ button:disabled {
   color: #9ca3af;
   transition: color .18s ease;
 }
-.search-box:focus-within,
-.select-input:focus-within,
-.field:focus-within {
-  background: #fff;
-  border-color: #0F7B5F;
-}
 .search-box:focus-within svg {
-  color: #0F7B5F;
+  color: #0f7b5f;
 }
-.search-box:focus-within,
-.select-input:focus-within {
-  box-shadow: 0 0 0 3px rgb(15 123 95 / 10%);
+.dialog-button {
+  min-height: 38px;
+  padding: 0 22px;
+  border-radius: 7px;
+  font-size: 14px;
 }
-.field:focus-visible,
-.select-input:focus-visible {
-  outline: none;
+.dialog-button svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.dialog-button.button-primary {
+  min-width: 108px;
+}
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 28px;
+  border-radius: 5px;
+  color: #94a3b8;
+  transition:
+    background 150ms,
+    color 150ms;
+}
+.action-button:hover {
+  background: #e3f3e9;
+  color: #197e50;
+}
+.action-delete:hover {
+  background: #fef2f2;
+  color: #c34c4c;
 }
 
 @layer components {
   .panel {
     @apply rounded-2xl border border-[#e2ebe6] bg-white shadow-[0_5px_22px_#173f3505];
   }
-  .field {
-    @apply h-11 w-full rounded-lg border border-[#d9e3dd] bg-white px-3 text-sm outline-none transition;
-  }
   .button {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition disabled:opacity-40;
   }
   .button-primary {
-    @apply bg-brand text-white hover:bg-[#0b422b];
+    @apply bg-[#047857] text-white hover:bg-[#065f46];
   }
   .button-add {
     @apply bg-[#13843e] text-white hover:bg-[#0b6f32];

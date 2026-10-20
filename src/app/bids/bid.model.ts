@@ -18,3 +18,38 @@ export interface Bid extends BidRequest {
   id: number;
   createdAt: string | null;
 }
+
+export interface BidNoticeRequest {
+  unitId: string;
+  jobNumber: string;
+}
+
+export interface BidNotice extends BidNoticeRequest {
+  noticeDate: string;
+  noticeType: string | null;
+  title: string | null;
+  filename: string;
+}
+
+export interface BidDetailRequest extends BidNoticeRequest {
+  noticeDate: string;
+  filename: string;
+}
+
+export interface BidImportDetail extends BidNoticeRequest {
+  unitName: string | null;
+  title: string | null;
+  noticeDate: string | null;
+  noticeType: string | null;
+  category: string | null;
+  tenderMethod: string | null;
+  deadline: string | null;
+  openingTime: string | null;
+  openingLocation: string | null;
+  contactName: string | null;
+  contactPhone: string | null;
+  budgetAmount: string | null;
+  bidBondRequired: string | null;
+  performanceLocation: string | null;
+  sourceUrl: string | null;
+}

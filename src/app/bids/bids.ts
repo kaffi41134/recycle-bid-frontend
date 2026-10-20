@@ -17,28 +17,32 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@
 import { finalize } from 'rxjs';
 import { Bid, BidRequest } from './bid.model';
 import { BidService } from './bid.service';
+import { BidImport } from './bid-import/bid-import';
+import { Pagination } from '../shared/pagination/pagination';
 import {
-  LucideChevronLeft,
-  LucideChevronRight,
+  LucideFileCheck,
   LucidePencil,
   LucidePlus,
   LucideRotateCw,
   LucideSearch,
   LucideTrash,
+  LucideX,
 } from '@lucide/angular';
 
 @Component({
   selector: 'app-bids',
   imports: [
+    BidImport,
     ReactiveFormsModule,
     DatePipe,
-    LucideChevronLeft,
-    LucideChevronRight,
+    Pagination,
+    LucideFileCheck,
     LucidePencil,
     LucidePlus,
     LucideRotateCw,
     LucideSearch,
     LucideTrash,
+    LucideX,
   ],
   templateUrl: './bids.html',
   styleUrl: './bids.css',
@@ -67,18 +71,54 @@ export class Bids implements OnInit {
   readonly searchForm = this.fb.group({ keyword: '' });
   readonly filters = signal(this.searchForm.getRawValue());
   readonly fields = [
-    { key: 'bidNo', label: '標售案號', type: 'text' },
-    { key: 'contactName', label: '聯絡人', type: 'text' },
-    { key: 'contactPhone', label: '電話', type: 'tel' },
-    { key: 'materialCode', label: '材料編號', type: 'text' },
-    { key: 'itemDescription', label: '品名規格', type: 'text' },
-    { key: 'quantity', label: '數量', type: 'number' },
-    { key: 'unit', label: '單位', type: 'text' },
-    { key: 'pickupLocation', label: '提貨地點', type: 'text' },
-    { key: 'quotationNoticeDate', label: '報價通知日', type: 'date' },
-    { key: 'quotationDeadlineDate', label: '報價截止日', type: 'date' },
-    { key: 'environmentalCode', label: '環保法定代碼', type: 'text' },
-    { key: 'referenceStorageLocation', label: '參考料位', type: 'text' },
+    {
+      key: 'bidNo',
+      label: '標售案號',
+      type: 'text',
+      group: 'basic',
+      placeholder: '請輸入標售案號',
+    },
+    { key: 'contactName', label: '聯絡人', type: 'text', group: 'basic', placeholder: '姓名' },
+    {
+      key: 'contactPhone',
+      label: '電話',
+      type: 'tel',
+      group: 'basic',
+      placeholder: '例：02-1234-5678',
+    },
+    { key: 'materialCode', label: '材料編號', type: 'text', group: 'material', placeholder: '' },
+    { key: 'itemDescription', label: '品名規格', type: 'text', group: 'material', placeholder: '' },
+    { key: 'quantity', label: '數量', type: 'number', group: 'material', placeholder: '0' },
+    { key: 'unit', label: '單位', type: 'text', group: 'material', placeholder: '例：公斤、個' },
+    { key: 'pickupLocation', label: '提貨地點', type: 'text', group: 'material', placeholder: '' },
+    {
+      key: 'quotationNoticeDate',
+      label: '報價通知日',
+      type: 'date',
+      group: 'quotation',
+      placeholder: '',
+    },
+    {
+      key: 'quotationDeadlineDate',
+      label: '報價截止日',
+      type: 'date',
+      group: 'quotation',
+      placeholder: '',
+    },
+    {
+      key: 'environmentalCode',
+      label: '環保法定代碼',
+      type: 'text',
+      group: 'other',
+      placeholder: '',
+    },
+    {
+      key: 'referenceStorageLocation',
+      label: '參考料位',
+      type: 'text',
+      group: 'other',
+      placeholder: '',
+    },
   ] as const;
   readonly bidForm = this.fb.group(
     {
@@ -118,16 +158,6 @@ export class Bids implements OnInit {
     const start = (this.currentPage() - 1) * this.pageSize();
     return this.filteredBids().slice(start, start + this.pageSize());
   });
-  readonly firstRecord = computed(() =>
-    this.filteredBids().length ? (this.currentPage() - 1) * this.pageSize() + 1 : 0,
-  );
-  readonly lastRecord = computed(() =>
-    Math.min(this.currentPage() * this.pageSize(), this.filteredBids().length),
-  );
-  readonly pageNumbers = computed(() => {
-    const start = Math.max(1, Math.min(this.currentPage() - 2, this.pageCount() - 4));
-    return Array.from({ length: Math.min(5, this.pageCount()) }, (_, index) => start + index);
-  });
 
   ngOnInit() {
     this.searchForm.valueChanges
@@ -163,11 +193,6 @@ export class Bids implements OnInit {
   resetSearch() {
     this.searchForm.reset();
     this.search();
-  }
-
-  changePageSize(value: string) {
-    this.pageSize.set(Number(value));
-    this.page.set(1);
   }
 
   openCreate() {

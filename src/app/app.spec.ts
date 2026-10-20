@@ -8,8 +8,8 @@ describe('App', () => {
       imports: [App],
       providers: [
         provideRouter([
-          { path: 'materials', children: [] },
-          { path: 'bids', children: [] },
+          { path: 'materials', title: '回收品項管理', children: [] },
+          { path: 'bids', title: '投標案件管理', children: [] },
         ]),
       ],
     }).compileComponents();
@@ -27,5 +27,6 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.nav-active')?.textContent).toContain('回收品項管理');
+    expect(compiled.textContent).toContain('首頁 回收品項管理');
   });
 });

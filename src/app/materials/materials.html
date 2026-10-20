@@ -1,7 +1,4 @@
-<section
-  class="mb-5 flex flex-wrap items-center justify-between gap-4"
-  aria-labelledby="page-title"
->
+<section class="mb-5 flex flex-wrap items-center justify-between gap-4">
   <div class="min-w-0">
     <div class="flex flex-wrap items-center gap-3">
       <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-[#0f172a]">
@@ -19,7 +16,7 @@
   </div>
   <button
     type="button"
-    class="add-material"
+    class="button dialog-button button-primary add-material"
     [disabled]="loading() || !!error()"
     (click)="openCreate()"
   >
@@ -27,12 +24,12 @@
   </button>
 </section>
 
-<section aria-labelledby="list-title" [attr.aria-busy]="loading()">
+<section [attr.aria-busy]="loading()">
   <h2 id="list-title" class="sr-only">回收品項列表</h2>
   <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
     <div class="min-w-0 flex-1">
       <label for="keyword" class="sr-only">關鍵字搜尋</label>
-      <div class="search-box">
+      <div class="search-box input-control">
         <svg lucideSearch [size]="17"></svg>
         <input
           id="keyword"
@@ -44,7 +41,7 @@
     </div>
     <div class="filter-select">
       <label for="category">分類</label
-      ><select id="category" class="select-input" formControlName="category">
+      ><select id="category" class="select-input input-control" formControlName="category">
         <option value="">全部類別</option>
         @for (category of categories; track category) {
           <option [value]="category">{{ category }}</option>
@@ -53,7 +50,7 @@
     </div>
     <div class="filter-select">
       <label for="status">狀態</label
-      ><select id="status" class="select-input" formControlName="status">
+      ><select id="status" class="select-input input-control" formControlName="status">
         <option value="">全部狀態</option>
         <option value="enabled">啟用</option>
         <option value="disabled">停用</option>
@@ -163,76 +160,20 @@
           </tbody>
         </table>
       </div>
-      <footer
-        class="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 text-[13px] text-[#64748b]"
-      >
-        <p>
-        顯示第 <strong class="font-bold">{{ firstRecord() }}</strong> –
-        <strong class="font-bold">{{ lastRecord() }}</strong> 筆，共
-        <strong class="font-bold">{{ filteredMaterials().length }}</strong> 筆資料
-        </p>
-        <div class="flex flex-wrap items-center gap-3">
-          <label for="page-size">每頁顯示</label
-          ><select
-            #pageSizeSelect
-            id="page-size"
-            class="select-input"
-            [value]="pageSize()"
-            (change)="changePageSize(pageSizeSelect.value)"
-          >
-            <option value="5">每頁 5 筆</option>
-            <option value="10">每頁 10 筆</option>
-            <option value="20">每頁 20 筆</option>
-          </select>
-          <nav class="pagination">
-            <button
-              type="button"
-              class="page-button"
-              [disabled]="currentPage() === 1"
-              (click)="page.set(currentPage() - 1)"
-            >
-              <svg lucideChevronLeft [size]="14"></svg>
-            </button>
-            @for (number of pageNumbers(); track number) {
-              <button
-                type="button"
-                class="page-button"
-                [class.page-active]="number === currentPage()"
-                (click)="page.set(number)"
-              >
-                {{ number }}
-              </button>
-            }
-            <button
-              type="button"
-              class="page-button"
-              [disabled]="currentPage() === pageCount()"
-              (click)="page.set(currentPage() + 1)"
-            >
-              <svg lucideChevronRight [size]="14"></svg>
-            </button>
-          </nav>
-        </div>
-      </footer>
+      <app-pagination
+        [(page)]="page"
+        [(pageSize)]="pageSize"
+        [totalItems]="filteredMaterials().length"
+      />
     }
   </div>
 </section>
 
-<dialog
-  #editor
-  class="form-dialog"
-  aria-labelledby="editor-title"
-  (cancel)="saving() && $event.preventDefault()"
->
+<dialog #editor class="form-dialog" (cancel)="saving() && $event.preventDefault()">
   <form [formGroup]="materialForm" (ngSubmit)="save()" class="p-6 md:p-7">
     <div class="mb-6 flex items-center justify-between">
       <h2 id="editor-title" class="text-xl font-bold">{{ editing() ? '編輯品項' : '新增品項' }}</h2>
-      <button
-        type="button"
-        class="text-button"
-        [disabled]="saving()"
-        (click)="closeEditor()"
-      >
+      <button type="button" class="text-button" [disabled]="saving()" (click)="closeEditor()">
         關閉
       </button>
     </div>
@@ -245,7 +186,7 @@
           >品項名稱 <span class="text-red-600">*</span></label
         ><input
           id="material-name"
-          class="field"
+          class="field input-control"
           formControlName="name"
           placeholder="例如：廢紅銅"
           [attr.aria-invalid]="
@@ -261,7 +202,7 @@
         <div>
           <label for="material-category" class="field-label"
             >分類 <span class="text-red-600">*</span></label
-          ><select id="material-category" class="field" formControlName="category">
+          ><select id="material-category" class="field input-control" formControlName="category">
             @for (category of categories; track category) {
               <option [value]="category">{{ category }}</option>
             }
@@ -272,7 +213,7 @@
             >單位 <span class="text-red-600">*</span></label
           ><input
             id="material-unit"
-            class="field"
+            class="field input-control"
             formControlName="unit"
             placeholder="例如：KG"
             [attr.aria-invalid]="
@@ -304,24 +245,22 @@
     <div class="mt-7 flex justify-end gap-3">
       <button
         type="button"
-        class="button button-secondary"
+        class="button dialog-button button-secondary"
         [disabled]="saving()"
         (click)="closeEditor()"
       >
-        取消</button
-      ><button type="submit" class="button button-primary" [disabled]="saving()">
+        <svg lucideX></svg>
+        取消
+      </button>
+      <button type="submit" class="button dialog-button button-primary" [disabled]="saving()">
+        <svg lucideFileCheck></svg>
         {{ saving() ? '儲存中…' : '儲存品項' }}
       </button>
     </div>
   </form>
 </dialog>
 
-<dialog
-  #deleteDialog
-  class="form-dialog"
-  aria-labelledby="delete-title"
-  (cancel)="deleting() && $event.preventDefault()"
->
+<dialog #deleteDialog class="form-dialog" (cancel)="deleting() && $event.preventDefault()">
   <div class="p-7">
     <h2 id="delete-title" class="text-xl font-bold">刪除回收品項</h2>
     <p class="mt-3 leading-6 text-[#688076]">
@@ -333,17 +272,20 @@
     <div class="mt-7 flex justify-end gap-3">
       <button
         type="button"
-        class="button button-secondary"
+        class="button dialog-button button-secondary"
         [disabled]="deleting()"
         (click)="closeDelete()"
       >
-        取消</button
-      ><button
+        <svg lucideX></svg>
+        取消
+      </button>
+      <button
         type="button"
-        class="button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
+        class="button dialog-button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
         [disabled]="deleting()"
         (click)="confirmDelete()"
       >
+        <svg lucideTrash></svg>
         {{ deleting() ? '刪除中…' : '確認刪除' }}
       </button>
     </div>

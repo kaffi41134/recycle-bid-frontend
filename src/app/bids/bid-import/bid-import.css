@@ -1,0 +1,15 @@
+.import-dialog {
+  width: min(960px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  color: #183c36;
+  background: white;
+  box-shadow: 0 24px 80px #102f2c30;
+}
+.import-dialog::backdrop {
+  background: #203c3380;
+}

@@ -6,17 +6,16 @@
   ></button>
 }
 <aside
-  id="sidebar"
   class="sidebar"
   [class.sidebar-open]="open()"
-  [class.sidebar-collapsed]="collapsed()"
+  [class.sidebar-collapsed]="!isExpanded()"
   (keydown.escape)="open.set(false)"
 >
   <a routerLink="/materials" class="brand" (click)="open.set(false)">
     <span class="brand-icon">
       <svg [lucideIcon]="brandIcon" [size]="20"></svg>
     </span>
-    <span class="brand-text">
+    <span class="brand-text collapsible-content">
       <span class="brand-title">Recycle Bid</span>
       <span class="brand-subtitle">SYSTEM MANAGEMENT</span>
     </span>
@@ -28,28 +27,29 @@
       [style.top.px]="highlight().top"
       [style.height.px]="highlight().height"
     ></i>
-    @for (item of navigation; track item.label) {
+    @for (item of navItems; track item.label) {
       <div #menuItem class="nav-entry relative z-10" (mouseenter)="moveHighlight(menuItem)">
-        @if (item.label === '回收品項管理' || item.label === '投標案件管理') {
+        @if (item.route) {
           <a
-            [routerLink]="item.label === '投標案件管理' ? '/bids' : '/materials'"
+            [routerLink]="item.route"
             routerLinkActive="nav-active"
             ariaCurrentWhenActive="page"
             class="nav-item gap-3"
+            [title]="!isExpanded() ? item.label : null"
             (click)="open.set(false)"
           >
             <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
-            <span>{{ item.label }}</span>
+            <span class="nav-label collapsible-content">{{ item.label }}</span>
           </a>
         } @else {
           <button
             type="button"
             class="nav-item w-full gap-3 text-left"
             disabled
-            title="此功能尚未建置"
+            [title]="isExpanded() ? '此功能尚未建置' : item.label + '（此功能尚未建置）'"
           >
             <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
-            <span>{{ item.label }}</span>
+            <span class="nav-label collapsible-content">{{ item.label }}</span>
           </button>
         }
       </div>
@@ -57,7 +57,7 @@
   </nav>
   <div class="sidebar-user">
     <span class="user-avatar">王</span>
-    <div>
+    <div class="sidebar-user-info collapsible-content">
       <p class="text-sm font-semibold text-white">王大明</p>
       <p class="mt-0.5 text-xs text-[#a7c4b8]">系統管理員</p>
     </div>

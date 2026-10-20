@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideBarcode,
@@ -6,12 +6,19 @@ import {
   LucideClipboardList,
   LucideDynamicIcon,
   LucideGavel,
+  LucideLeaf,
   LucideLayoutDashboard,
   LucideRecycle,
-  LucideRefreshCcw,
   LucideSettings,
   LucideTrendingUp,
+  type LucideIconInput,
 } from '@lucide/angular';
+
+interface NavItem {
+  readonly icon: LucideIconInput;
+  readonly label: string;
+  readonly route?: string;
+}
 
 @Component({
   selector: 'app-sidebar',
@@ -21,14 +28,14 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Sidebar {
-  readonly brandIcon = LucideRefreshCcw;
+  readonly brandIcon = LucideLeaf;
   readonly open = model(false);
-  readonly collapsed = input(false);
+  readonly isExpanded = model(true);
   readonly highlight = signal({ top: 0, height: 0 });
-  readonly navigation = [
+  readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: LucideLayoutDashboard },
-    { label: '回收品項管理', icon: LucideRecycle },
-    { label: '投標案件管理', icon: LucideGavel },
+    { label: '回收品項管理', icon: LucideRecycle, route: '/materials' },
+    { label: '投標案件管理', icon: LucideGavel, route: '/bids' },
     { label: '回收紀錄', icon: LucideClipboardList },
     { label: 'Barcode', icon: LucideBarcode },
     { label: '金屬價格', icon: LucideTrendingUp },

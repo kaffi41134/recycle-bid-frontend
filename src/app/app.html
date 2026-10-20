@@ -1,22 +1,22 @@
 <div class="min-h-screen bg-[#f3f6f4]">
-  <app-sidebar [(open)]="sidebarOpen" [collapsed]="sidebarCollapsed()" />
-  <div class="app-content" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <app-sidebar [(open)]="sidebarOpen" [(isExpanded)]="sidebarExpanded" />
+  <div class="app-content" [class.sidebar-collapsed]="!sidebarExpanded()">
     <main class="mx-auto max-w-[1600px] px-6 py-6">
       <div class="mb-4 flex items-center gap-2">
         <button
           type="button"
           class="text-button lg:hidden"
           [attr.aria-expanded]="sidebarOpen()"
-          (click)="sidebarOpen.set(!sidebarOpen())"
+          (click)="sidebarExpanded.set(true); sidebarOpen.set(!sidebarOpen())"
         >
           <svg lucideMenu [size]="20"></svg>
         </button>
         <button
           type="button"
           class="text-button hidden lg:inline-flex"
-          [attr.aria-expanded]="!sidebarCollapsed()"
-          [title]="sidebarCollapsed() ? '展開側邊選單' : '收合側邊選單'"
-          (click)="sidebarCollapsed.set(!sidebarCollapsed())"
+          [attr.aria-expanded]="sidebarExpanded()"
+          [title]="sidebarExpanded() ? '收合側邊選單' : '展開側邊選單'"
+          (click)="sidebarExpanded.update((expanded) => !expanded)"
         >
           <svg lucideMenu [size]="20"></svg>
         </button>
