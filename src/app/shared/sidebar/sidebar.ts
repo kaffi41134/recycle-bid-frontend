@@ -35,7 +35,8 @@ export class Sidebar {
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: LucideLayoutDashboard },
     { label: '回收品項管理', icon: LucideRecycle, route: '/materials' },
-    { label: '投標案件管理', icon: LucideGavel, route: '/bids' },
+    { label: '一般標案', icon: LucideGavel, route: '/bids' },
+    { label: '政府標案', icon: LucideGavel, route: '/government-bids' },
     { label: '回收紀錄', icon: LucideClipboardList },
     { label: 'Barcode', icon: LucideBarcode },
     { label: '金屬價格', icon: LucideTrendingUp },

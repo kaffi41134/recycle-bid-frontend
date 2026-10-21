@@ -1,297 +1,305 @@
-<section class="mb-5 flex flex-wrap items-center justify-between gap-4">
-  <div class="min-w-0">
-    <div class="flex flex-wrap items-center gap-3">
-      <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-[#0f172a]">
-        投標案件管理
-      </h1>
-      <span
-        class="rounded-full border border-[#a7f3d0] bg-[#ecfdf5] px-2 py-0.5 text-[11px] font-medium leading-4 text-[#047857]"
-        >共 {{ bids().length }} 筆案件</span
-      >
-    </div>
-    <p class="mt-1 text-xs leading-5 text-[#64748b]">集中管理標售案件、材料資訊與報價時程。</p>
-  </div>
-  <div class="flex flex-wrap gap-3">
-    <button type="button" class="button dialog-button button-secondary" (click)="bidImport.open()">
-      <svg lucideSearch [size]="16"></svg>查詢標案公告
-    </button>
-    <button
-      type="button"
-      class="button dialog-button button-primary add-bid"
-      [disabled]="loading() || !!error()"
-      (click)="openCreate()"
-    >
-      <svg lucidePlus [size]="16"></svg>新增案件
-    </button>
-  </div>
-</section>
-<app-bid-import #bidImport />
-
-<section [attr.aria-busy]="loading()">
-  <h2 id="list-title" class="sr-only">投標案件列表</h2>
-  <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
-    <div class="min-w-0 flex-1">
-      <label for="keyword" class="sr-only">關鍵字搜尋</label>
-      <div class="search-box input-control">
-        <svg lucideSearch [size]="17"></svg>
-        <input
-          id="keyword"
-          type="search"
-          formControlName="keyword"
-          placeholder="搜尋標售案號、材料、聯絡人或提貨地點"
-        />
+<div class="mb-10">
+  <section class="mb-5 flex flex-wrap items-center justify-between gap-4">
+    <div>
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-slate-900">
+          一般標案
+        </h1>
+        <span class="rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand"
+          >共 {{ bids().length }} 筆案件</span
+        >
       </div>
+      <p class="mt-1 text-xs leading-5 text-slate-500">集中管理標售案件、材料資訊與報價時程。</p>
     </div>
-    <button type="button" class="reset-button" (click)="resetSearch()">
-      <svg lucideRotateCw [size]="15"></svg>重設
-    </button>
-    <span class="whitespace-nowrap text-[13px] text-[#64748b]"
-      >篩選結果:
-      <strong class="font-bold text-[#334155]">{{ filteredBids().length }}</strong>
-      筆資料</span
-    >
-  </form>
-
-  <div class="bids-panel">
-    @if (error()) {
-      <div
-        class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
-        role="alert"
+    <div class="flex flex-wrap gap-3">
+      <button
+        type="button"
+        class="button dialog-button button-primary add-bid"
+        [disabled]="loading() || !!error()"
+        (click)="openCreate()"
       >
-        <p>{{ error() }}</p>
-        <button type="button" class="button button-secondary" (click)="loadBids()">重新載入</button>
+        <svg lucidePlus [size]="16"></svg>新增標案
+      </button>
+    </div>
+  </section>
+
+  <section [attr.aria-busy]="loading()">
+    <h2 id="list-title" class="sr-only">投標案件列表</h2>
+    <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
+      <div class="min-w-0 flex-1">
+        <label for="keyword" class="sr-only">關鍵字搜尋</label>
+        <div class="search-box input-control">
+          <svg lucideSearch [size]="17"></svg>
+          <input
+            id="keyword"
+            type="search"
+            formControlName="keyword"
+            placeholder="搜尋標售案號、材料、聯絡人或提貨地點"
+          />
+        </div>
       </div>
-    } @else {
-      <div class="overflow-x-auto" role="region" aria-label="投標案件列表，可左右捲動" tabindex="0">
-        <table class="bid-table w-full min-w-[1800px] text-left">
-          <thead>
-            <tr>
-              @for (field of fields; track field.key) {
-                <th scope="col">{{ field.label }}</th>
-              }
-              <th scope="col">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (loading()) {
+      <button type="button" class="reset-button" (click)="resetSearch()">
+        <svg lucideRotateCw [size]="15"></svg>重設
+      </button>
+      <span class="whitespace-nowrap text-[13px] text-[#64748b]"
+        >篩選結果:
+        <strong class="font-bold text-[#334155]">{{ filteredBids().length }}</strong>
+        筆資料</span
+      >
+    </form>
+
+    <div class="table-panel">
+      @if (error()) {
+        <div
+          class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
+          role="alert"
+        >
+          <p>{{ error() }}</p>
+          <button type="button" class="button button-secondary" (click)="loadBids()">
+            重新載入
+          </button>
+        </div>
+      } @else {
+        <div
+          class="overflow-x-auto"
+          role="region"
+          aria-label="投標案件列表，可左右捲動"
+          tabindex="0"
+        >
+          <table class="data-table table-nowrap w-full min-w-[1800px] text-left">
+            <thead>
               <tr>
-                <td colspan="13" class="!py-14 text-center text-slate-500" role="status">
-                  正在載入案件資料…
-                </td>
+                @for (field of fields; track field.key) {
+                  <th scope="col">{{ field.label }}</th>
+                }
+                <th scope="col" class="table-actions">操作</th>
               </tr>
-            } @else {
-              @for (item of visibleBids(); track item.id) {
+            </thead>
+            <tbody>
+              @if (loading()) {
                 <tr>
-                  @for (field of fields; track field.key) {
-                    <td
-                      [class.bid-code]="field.key === 'bidNo'"
-                      [class.bid-description]="field.key === 'itemDescription'"
-                    >
-                      {{ item[field.key] ?? '—' }}
+                  <td colspan="13" class="!py-14 text-center text-slate-500" role="status">
+                    正在載入案件資料…
+                  </td>
+                </tr>
+              } @else {
+                @for (item of visibleBids(); track item.id) {
+                  <tr>
+                    @for (field of fields; track field.key) {
+                      <td
+                        [class.table-code]="field.key === 'bidNo'"
+                        [class.table-description]="field.key === 'itemDescription'"
+                      >
+                        {{ item[field.key] ?? '—' }}
+                      </td>
+                    }
+                    <td class="table-actions">
+                      <div class="flex gap-2">
+                        <button
+                          type="button"
+                          class="action-button"
+                          [attr.title]="'編輯' + item.bidNo"
+                          [attr.aria-label]="'編輯' + item.bidNo"
+                          (click)="openEdit(item)"
+                        >
+                          <svg lucidePencil [size]="14"></svg></button
+                        ><button
+                          type="button"
+                          class="action-button action-delete"
+                          [attr.title]="'刪除' + item.bidNo"
+                          [attr.aria-label]="'刪除' + item.bidNo"
+                          (click)="askDelete(item)"
+                        >
+                          <svg lucideTrash [size]="14"></svg>
+                        </button>
+                      </div>
                     </td>
-                  }
-                  <td>
-                    <div class="flex gap-2">
-                      <button
-                        type="button"
-                        class="action-button"
-                        [attr.title]="'編輯' + item.bidNo"
-                        [attr.aria-label]="'編輯' + item.bidNo"
-                        (click)="openEdit(item)"
-                      >
-                        <svg lucidePencil [size]="14"></svg></button
-                      ><button
-                        type="button"
-                        class="action-button action-delete"
-                        [attr.title]="'刪除' + item.bidNo"
-                        [attr.aria-label]="'刪除' + item.bidNo"
-                        (click)="askDelete(item)"
-                      >
-                        <svg lucideTrash [size]="14"></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="13" class="!py-14 !text-center">
-                    <p class="mt-3 font-medium">沒有符合條件的案件</p>
-                    <p class="mt-1 text-sm text-[#73867c]">
-                      請調整查詢條件，或新增第一筆投標案件。
-                    </p>
-                  </td>
-                </tr>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="13" class="!py-14 !text-center">
+                      <p class="mt-3 font-medium">沒有符合條件的案件</p>
+                      <p class="mt-1 text-sm text-[#73867c]">
+                        請調整查詢條件，或新增第一筆投標案件。
+                      </p>
+                    </td>
+                  </tr>
+                }
               }
-            }
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
+        <app-pagination
+          [(page)]="page"
+          [(pageSize)]="pageSize"
+          [totalItems]="filteredBids().length"
+        />
+      }
+    </div>
+  </section>
+
+  <dialog #editor class="form-dialog bid-editor" (cancel)="saving() && $event.preventDefault()">
+    <form [formGroup]="bidForm" (ngSubmit)="save()" class="flex max-h-[calc(100dvh-32px)] flex-col">
+      <header
+        class="editor-header flex min-h-[60px] shrink-0 items-center justify-between border-b border-[#c1d1c9] px-[25px] py-3"
+      >
+        <h2 id="editor-title" class="text-xl font-bold leading-7">
+          {{ editing() ? '編輯案件' : '新增標案' }}
+        </h2>
+        <button
+          type="button"
+          class="text-button text-[13px] text-[#64766e]"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          關閉
+        </button>
+      </header>
+      <div
+        class="flex min-h-9 shrink-0 flex-wrap items-center justify-end gap-x-3.5 gap-y-2 border-b border-[#c1d1c9] bg-[#f5f8f6] px-[25px] py-2 text-[11px] leading-[19px] max-[539px]:justify-start max-[539px]:px-5"
+      >
+        <p><span class="text-red-600">*</span> 為必填，其餘可依案件資料填寫</p>
+        <ul class="flex flex-wrap items-center gap-3.5 text-[#76867d]" aria-label="欄位分類">
+          <li class="flex items-center gap-[5px]">
+            <span class="category-dot" data-group="basic" aria-hidden="true"></span>基本資料
+          </li>
+          <li class="flex items-center gap-[5px]">
+            <span class="category-dot" data-group="material" aria-hidden="true"></span>材料資訊
+          </li>
+          <li class="flex items-center gap-[5px]">
+            <span class="category-dot" data-group="quotation" aria-hidden="true"></span>報價日期
+          </li>
+          <li class="flex items-center gap-[5px]">
+            <span class="category-dot" data-group="other" aria-hidden="true"></span>其他
+          </li>
+        </ul>
       </div>
-      <app-pagination
-        [(page)]="page"
-        [(pageSize)]="pageSize"
-        [totalItems]="filteredBids().length"
-      />
-    }
-  </div>
-</section>
-
-<dialog #editor class="form-dialog bid-editor" (cancel)="saving() && $event.preventDefault()">
-  <form [formGroup]="bidForm" (ngSubmit)="save()" class="flex max-h-[calc(100dvh-32px)] flex-col">
-    <header
-      class="editor-header flex min-h-[60px] shrink-0 items-center justify-between border-b border-[#c1d1c9] px-[25px] py-3"
-    >
-      <h2 id="editor-title" class="text-xl font-bold leading-7">
-        {{ editing() ? '編輯案件' : '新增案件' }}
-      </h2>
-      <button
-        type="button"
-        class="text-button text-[13px] text-[#64766e]"
-        [disabled]="saving()"
-        (click)="closeEditor()"
-      >
-        關閉
-      </button>
-    </header>
-    <div
-      class="flex min-h-9 shrink-0 flex-wrap items-center justify-end gap-x-3.5 gap-y-2 border-b border-[#c1d1c9] bg-[#f5f8f6] px-[25px] py-2 text-[11px] leading-[19px] max-[539px]:justify-start max-[539px]:px-5"
-    >
-      <p><span class="text-red-600">*</span> 為必填，其餘可依案件資料填寫</p>
-      <ul class="flex flex-wrap items-center gap-3.5 text-[#76867d]" aria-label="欄位分類">
-        <li class="flex items-center gap-[5px]">
-          <span class="category-dot" data-group="basic" aria-hidden="true"></span>基本資料
-        </li>
-        <li class="flex items-center gap-[5px]">
-          <span class="category-dot" data-group="material" aria-hidden="true"></span>材料資訊
-        </li>
-        <li class="flex items-center gap-[5px]">
-          <span class="category-dot" data-group="quotation" aria-hidden="true"></span>報價日期
-        </li>
-        <li class="flex items-center gap-[5px]">
-          <span class="category-dot" data-group="other" aria-hidden="true"></span>其他
-        </li>
-      </ul>
-    </div>
-    <div class="editor-fields min-h-0 min-w-0 overflow-y-auto px-[25px] pt-[18px] pb-5">
-      <fieldset
-        class="grid min-w-0 grid-cols-1 gap-x-[18px] gap-y-[15px] min-[540px]:grid-cols-2"
-        [disabled]="saving()"
-      >
-        @for (field of fields; track field.key) {
-          <div class="min-w-0" [class.col-span-full]="field.key === 'itemDescription'">
-            <label
-              [for]="'bid-' + field.key"
-              class="field-label mb-1.5 flex items-center gap-1.5 text-[13px] leading-[18px]"
-            >
-              <span class="category-dot" [attr.data-group]="field.group" aria-hidden="true"></span>
-              {{ field.label }}
-              @if (field.key === 'bidNo') {
-                <span class="text-red-600">*</span>
+      <div class="editor-fields min-h-0 min-w-0 overflow-y-auto px-[25px] pt-[18px] pb-5">
+        <fieldset
+          class="grid min-w-0 grid-cols-1 gap-x-[18px] gap-y-[15px] min-[540px]:grid-cols-2"
+          [disabled]="saving()"
+        >
+          @for (field of fields; track field.key) {
+            <div class="min-w-0" [class.col-span-full]="field.key === 'itemDescription'">
+              <label
+                [for]="'bid-' + field.key"
+                class="field-label mb-1.5 flex items-center gap-1.5 text-[13px] leading-[18px]"
+              >
+                <span
+                  class="category-dot"
+                  [attr.data-group]="field.group"
+                  aria-hidden="true"
+                ></span>
+                {{ field.label }}
+                @if (field.key === 'bidNo') {
+                  <span class="text-red-600">*</span>
+                }
+              </label>
+              @if (field.key === 'quantity') {
+                <input
+                  id="bid-quantity"
+                  class="field input-control"
+                  type="number"
+                  step="any"
+                  [placeholder]="field.placeholder"
+                  formControlName="quantity"
+                />
+              } @else {
+                <input
+                  [id]="'bid-' + field.key"
+                  class="field input-control"
+                  [type]="field.type"
+                  [placeholder]="field.placeholder"
+                  [formControlName]="field.key"
+                  [attr.required]="field.key === 'bidNo' ? '' : null"
+                  [attr.aria-invalid]="
+                    (bidForm.controls[field.key].touched && bidForm.controls[field.key].invalid) ||
+                    (field.key === 'quotationDeadlineDate' && bidForm.hasError('dateRange'))
+                  "
+                  [attr.aria-describedby]="
+                    field.key === 'bidNo'
+                      ? 'bid-no-error'
+                      : field.key === 'quotationDeadlineDate'
+                        ? 'date-error'
+                        : null
+                  "
+                />
               }
-            </label>
-            @if (field.key === 'quantity') {
-              <input
-                id="bid-quantity"
-                class="field input-control"
-                type="number"
-                step="any"
-                [placeholder]="field.placeholder"
-                formControlName="quantity"
-              />
-            } @else {
-              <input
-                [id]="'bid-' + field.key"
-                class="field input-control"
-                [type]="field.type"
-                [placeholder]="field.placeholder"
-                [formControlName]="field.key"
-                [attr.required]="field.key === 'bidNo' ? '' : null"
-                [attr.aria-invalid]="
-                  (bidForm.controls[field.key].touched && bidForm.controls[field.key].invalid) ||
-                  (field.key === 'quotationDeadlineDate' && bidForm.hasError('dateRange'))
-                "
-                [attr.aria-describedby]="
-                  field.key === 'bidNo'
-                    ? 'bid-no-error'
-                    : field.key === 'quotationDeadlineDate'
-                      ? 'date-error'
-                      : null
-                "
-              />
-            }
-            @if (
-              field.key === 'bidNo' &&
-              bidForm.controls.bidNo.touched &&
-              bidForm.controls.bidNo.invalid
-            ) {
-              <p id="bid-no-error" class="mt-1 text-xs text-red-600">
-                請輸入標售案號，不可只填空白。
-              </p>
-            }
-          </div>
-        }
-        @if (bidForm.hasError('dateRange')) {
-          <p id="date-error" class="col-span-full text-sm text-red-600" role="alert">
-            報價截止日不能早於報價通知日。
-          </p>
-        }
-        @if (editing()?.createdAt) {
-          <p class="text-xs text-[#73867c]">
-            建立時間：{{ editing()?.createdAt | date: 'yyyy-MM-dd HH:mm' }}
-          </p>
-        }
-        @if (formError()) {
-          <p class="col-span-full rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
-            {{ formError() }}
-          </p>
-        }
-      </fieldset>
-    </div>
-    <footer
-      class="editor-footer flex shrink-0 justify-end gap-[9px] border-t border-[#c1d1c9] px-[25px] py-[13px]"
-    >
-      <button
-        type="button"
-        class="button dialog-button button-secondary"
-        [disabled]="saving()"
-        (click)="closeEditor()"
+              @if (
+                field.key === 'bidNo' &&
+                bidForm.controls.bidNo.touched &&
+                bidForm.controls.bidNo.invalid
+              ) {
+                <p id="bid-no-error" class="mt-1 text-xs text-red-600">
+                  請輸入標售案號，不可只填空白。
+                </p>
+              }
+            </div>
+          }
+          @if (bidForm.hasError('dateRange')) {
+            <p id="date-error" class="col-span-full text-sm text-red-600" role="alert">
+              報價截止日不能早於報價通知日。
+            </p>
+          }
+          @if (editing()?.createdAt) {
+            <p class="text-xs text-[#73867c]">
+              建立時間：{{ editing()?.createdAt | date: 'yyyy-MM-dd HH:mm' }}
+            </p>
+          }
+          @if (formError()) {
+            <p class="col-span-full rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+              {{ formError() }}
+            </p>
+          }
+        </fieldset>
+      </div>
+      <footer
+        class="editor-footer flex shrink-0 justify-end gap-[9px] border-t border-[#c1d1c9] px-[25px] py-[13px]"
       >
-        <svg lucideX></svg>
-        取消</button
-      ><button type="submit" class="button dialog-button button-primary" [disabled]="saving()">
-        <svg lucideFileCheck></svg>
-        {{ saving() ? '儲存中…' : '儲存案件' }}
-      </button>
-    </footer>
-  </form>
-</dialog>
+        <button
+          type="button"
+          class="button dialog-button button-secondary"
+          [disabled]="saving()"
+          (click)="closeEditor()"
+        >
+          <svg lucideX></svg>
+          取消</button
+        ><button type="submit" class="button dialog-button button-primary" [disabled]="saving()">
+          <svg lucideFileCheck></svg>
+          {{ saving() ? '儲存中…' : '儲存案件' }}
+        </button>
+      </footer>
+    </form>
+  </dialog>
 
-<dialog #deleteDialog class="form-dialog" (cancel)="deleting() && $event.preventDefault()">
-  <div class="p-7">
-    <h2 id="delete-title" class="text-xl font-bold">刪除投標案件</h2>
-    <p class="mt-3 leading-6 text-[#688076]">
-      確定刪除「{{ pendingDelete()?.bidNo }}」嗎？刪除後無法復原。
-    </p>
-    @if (deleteError()) {
-      <p class="mt-4 rounded-lg bg-red-50 p-3 text-red-700" role="alert">{{ deleteError() }}</p>
-    }
-    <div class="mt-7 flex justify-end gap-3">
-      <button
-        type="button"
-        class="button dialog-button button-secondary"
-        [disabled]="deleting()"
-        (click)="closeDelete()"
-      >
-        <svg lucideX></svg>
-        取消</button
-      ><button
-        type="button"
-        class="button dialog-button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
-        [disabled]="deleting()"
-        (click)="confirmDelete()"
-      >
-        <svg lucideTrash></svg>
-        {{ deleting() ? '刪除中…' : '確認刪除' }}
-      </button>
+  <dialog #deleteDialog class="form-dialog" (cancel)="deleting() && $event.preventDefault()">
+    <div class="p-7">
+      <h2 id="delete-title" class="text-xl font-bold">刪除投標案件</h2>
+      <p class="mt-3 leading-6 text-[#688076]">
+        確定刪除「{{ pendingDelete()?.bidNo }}」嗎？刪除後無法復原。
+      </p>
+      @if (deleteError()) {
+        <p class="mt-4 rounded-lg bg-red-50 p-3 text-red-700" role="alert">{{ deleteError() }}</p>
+      }
+      <div class="mt-7 flex justify-end gap-3">
+        <button
+          type="button"
+          class="button dialog-button button-secondary"
+          [disabled]="deleting()"
+          (click)="closeDelete()"
+        >
+          <svg lucideX></svg>
+          取消</button
+        ><button
+          type="button"
+          class="button dialog-button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
+          [disabled]="deleting()"
+          (click)="confirmDelete()"
+        >
+          <svg lucideTrash></svg>
+          {{ deleting() ? '刪除中…' : '確認刪除' }}
+        </button>
+      </div>
     </div>
-  </div>
-</dialog>
+  </dialog>
+</div>

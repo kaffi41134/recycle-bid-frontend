@@ -4,6 +4,7 @@ import {
   DestroyRef,
   ElementRef,
   inject,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
@@ -11,25 +12,48 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, Subject, takeUntil } from 'rxjs';
-import { LucideSearch } from '@lucide/angular';
+import {
+  LucideSearch,
+  LucideX,
+  LucideRotateCw,
+  LucideFileInput,
+  LucideFileCheck,
+} from '@lucide/angular';
 import { BidService } from '../bid.service';
-import { BidImportDetail, BidNotice } from '../bid.model';
+import { BidNotice } from '../bid.model';
+import { GovernmentBidService } from '../government-bids/government-bid.service';
+import { governmentBidFields } from '../government-bids/government-bid.model';
+import {
+  createGovernmentBidForm,
+  toGovernmentBidRequest,
+} from '../government-bids/government-bid.form';
 
 @Component({
   selector: 'app-bid-import',
-  imports: [ReactiveFormsModule, LucideSearch],
+  imports: [
+    ReactiveFormsModule,
+    LucideSearch,
+    LucideX,
+    LucideRotateCw,
+    LucideFileInput,
+    LucideFileCheck,
+  ],
   templateUrl: './bid-import.html',
   styleUrl: './bid-import.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BidImport {
   private readonly service = inject(BidService);
+  private readonly governmentService = inject(GovernmentBidService);
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
   private readonly cancelRequests = new Subject<void>();
 
   readonly searching = signal(false);
+  readonly saving = signal(false);
+  readonly saveError = signal('');
+  readonly saved = output<void>();
   readonly loadingDetail = signal(false);
   readonly searched = signal(false);
   readonly notices = signal<BidNotice[]>([]);
@@ -41,47 +65,12 @@ export class BidImport {
     unitId: ['', [Validators.required, Validators.pattern(/\S/)]],
     jobNumber: ['', [Validators.required, Validators.pattern(/\S/)]],
   });
-  readonly fields = [
-    { key: 'unitId', label: '招標機關代碼' },
-    { key: 'jobNumber', label: '標案案號' },
-    { key: 'unitName', label: '招標機關名稱' },
-    { key: 'title', label: '標案名稱' },
-    { key: 'noticeDate', label: '公告日期' },
-    { key: 'noticeType', label: '公告類型' },
-    { key: 'category', label: '標的分類' },
-    { key: 'tenderMethod', label: '招標方式' },
-    { key: 'deadline', label: '截止投標時間' },
-    { key: 'openingTime', label: '開標時間' },
-    { key: 'openingLocation', label: '開標地點' },
-    { key: 'contactName', label: '機關聯絡人' },
-    { key: 'contactPhone', label: '機關聯絡電話' },
-    { key: 'budgetAmount', label: '預算金額' },
-    { key: 'bidBondRequired', label: '是否須繳納押標金' },
-    { key: 'performanceLocation', label: '履約地點' },
-    { key: 'sourceUrl', label: '政府標案公告網址' },
-  ] as const satisfies readonly { key: keyof BidImportDetail; label: string }[];
+  readonly fields = governmentBidFields;
   // 第三方日期、時間及金額保留原始字串，避免遺失民國日期、時間或金額文字。
-  readonly detailForm = this.fb.group({
-    unitId: '',
-    jobNumber: '',
-    unitName: '',
-    title: '',
-    noticeDate: '',
-    noticeType: '',
-    category: '',
-    tenderMethod: '',
-    deadline: '',
-    openingTime: '',
-    openingLocation: '',
-    contactName: '',
-    contactPhone: '',
-    budgetAmount: '',
-    bidBondRequired: '',
-    performanceLocation: '',
-    sourceUrl: '',
-  });
+  readonly detailForm = createGovernmentBidForm(this.fb);
 
   open() {
+    if (this.saving()) return;
     this.cancelRequests.next();
     this.queryForm.reset();
     this.notices.set([]);
@@ -92,12 +81,13 @@ export class BidImport {
   }
 
   close() {
+    if (this.saving()) return;
     this.cancelRequests.next();
     this.dialog().nativeElement.close();
   }
 
   search() {
-    if (this.searching()) return;
+    if (this.searching() || this.saving()) return;
     this.queryForm.markAllAsTouched();
     if (this.queryForm.invalid) return;
     this.cancelRequests.next();
@@ -124,6 +114,7 @@ export class BidImport {
   }
 
   selectNotice(notice: BidNotice) {
+    if (this.saving()) return;
     // 每次選取都取消前一筆請求，較慢的舊回應不會覆蓋新選取的公告。
     this.cancelRequests.next();
     this.clearDetail();
@@ -153,10 +144,37 @@ export class BidImport {
   }
 
   private clearDetail() {
+    this.saveError.set('');
     this.selected.set(null);
     this.detailLoaded.set(false);
     this.detailError.set('');
     this.detailForm.reset();
+  }
+
+  save() {
+    if (this.saving() || this.loadingDetail() || !this.detailLoaded()) return;
+    this.detailForm.markAllAsTouched();
+    if (this.detailForm.invalid) return;
+    this.saving.set(true);
+    this.saveError.set('');
+    this.governmentService
+      .create(toGovernmentBidRequest(this.detailForm.getRawValue()))
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.saving.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.dialog().nativeElement.close();
+          this.saved.emit();
+        },
+        error: (error: HttpErrorResponse) =>
+          this.saveError.set(
+            typeof error.error === 'string' && error.status >= 400 && error.status < 500
+              ? error.error
+              : '無法儲存政府標案，請確認後端連線後重試。',
+          ),
+      });
   }
 
   private errorMessage(error: HttpErrorResponse) {

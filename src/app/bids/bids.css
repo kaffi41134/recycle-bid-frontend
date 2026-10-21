@@ -1,9 +1,3 @@
-.bids-panel {
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #fff;
-}
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -52,47 +46,6 @@
   .filter-bar > :first-child {
     flex-basis: 100%;
   }
-}
-.bid-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 13px;
-  color: #334155;
-}
-.bid-table th {
-  height: 44px;
-  padding: 8px 14px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #334155;
-  font-size: 12px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.bid-table th:last-child {
-  text-align: left;
-}
-.bid-table td:last-child > div {
-  justify-content: flex-start;
-}
-.bid-table td {
-  height: 52px;
-  padding: 8px 14px;
-  border-bottom: 1px solid #f1f5f9;
-}
-.bid-table tbody tr:hover {
-  background: #f8fafc;
-}
-.bid-date {
-  font-variant-numeric: tabular-nums;
-}
-.bid-code {
-  color: #155e75;
-}
-.bid-date {
-  color: #64748b;
-  line-height: 1.5;
-  white-space: nowrap;
 }
 .form-dialog {
   width: min(480px, calc(100vw - 32px));
@@ -156,23 +109,4 @@
     padding-right: 20px;
     padding-left: 20px;
   }
-}
-.bid-table td {
-  white-space: nowrap;
-}
-.bid-table td.bid-description {
-  min-width: 180px;
-  max-width: 300px;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-.bid-table th:last-child,
-.bid-table td:last-child {
-  position: sticky;
-  right: 0;
-  background: #fff;
-  box-shadow: -1px 0 #e2e8f0;
-}
-.bid-table th:last-child {
-  background: #f8fafc;
 }

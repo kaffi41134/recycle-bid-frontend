@@ -5,7 +5,7 @@
         回收品項管理
       </h1>
       <span
-        class="rounded-full border border-[#a7f3d0] bg-[#ecfdf5] px-2 py-0.5 text-[11px] font-medium leading-4 text-[#047857]"
+        class="rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand"
       >
         啟用中: {{ enabledCount() }} / {{ materials().length }} 項
       </span>
@@ -66,7 +66,7 @@
     >
   </form>
 
-  <div class="materials-panel">
+  <div class="table-panel">
     @if (error()) {
       <div
         class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
@@ -79,7 +79,7 @@
       </div>
     } @else {
       <div class="overflow-x-auto">
-        <table class="material-table w-full min-w-[780px] text-left">
+        <table class="data-table w-full min-w-[780px] text-left">
           <thead>
             <tr>
               <th scope="col">品項代碼</th>
@@ -101,7 +101,7 @@
             } @else {
               @for (item of visibleMaterials(); track item.id) {
                 <tr [class.material-disabled]="!item.enabled">
-                  <td class="material-code">{{ item.code }}</td>
+                  <td class="table-code">{{ item.code }}</td>
                   <td>
                     <div class="flex items-center gap-2">
                       <span
@@ -121,7 +121,7 @@
                       >{{ item.enabled ? '啟用' : '停用' }}</span
                     >
                   </td>
-                  <td class="material-date">
+                  <td class="table-date">
                     <time [attr.datetime]="item.createdAt">{{
                       item.createdAt ? (item.createdAt | date: 'yyyy-MM-dd HH:mm') : '—'
                     }}</time>

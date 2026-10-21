@@ -9,13 +9,20 @@
           查詢公告後，點選一筆公告，將全部明細帶入下方欄位。
         </p>
       </div>
-      <button type="button" class="text-button shrink-0" (click)="close()">關閉</button>
+      <button
+        type="button"
+        class="text-button shrink-0 gap-2"
+        [disabled]="saving()"
+        (click)="close()"
+      >
+        <svg lucideX [size]="16"></svg>關閉
+      </button>
     </header>
     <div class="min-h-0 space-y-5 overflow-y-auto p-6">
       <form [formGroup]="queryForm" (ngSubmit)="search()">
         <fieldset
           class="grid items-start gap-4 sm:grid-cols-[1fr_1fr_auto]"
-          [disabled]="searching()"
+          [disabled]="searching() || saving()"
         >
           <div>
             <label for="import-unit" class="field-label"
@@ -48,7 +55,7 @@
           <button
             type="submit"
             class="button dialog-button button-primary sm:mt-7"
-            [disabled]="searching()"
+            [disabled]="searching() || saving()"
           >
             <svg lucideSearch [size]="16"></svg>{{ searching() ? '查詢中…' : '查詢公告' }}
           </button>
@@ -67,32 +74,34 @@
             公告清單
             <span class="text-sm font-normal text-slate-500">共 {{ notices().length }} 筆</span>
           </h3>
-          <div class="overflow-x-auto rounded-lg border border-slate-200">
-            <table class="w-full min-w-[600px] text-left text-sm">
-              <thead class="bg-slate-50 text-xs text-slate-600">
+          <div class="table-panel overflow-x-auto">
+            <table class="data-table w-full min-w-[600px] text-left">
+              <thead>
                 <tr>
-                  <th scope="col" class="p-3">公告日期</th>
-                  <th scope="col" class="p-3">公告類型</th>
-                  <th scope="col" class="p-3">標案名稱</th>
-                  <th scope="col" class="p-3">操作</th>
+                  <th scope="col">公告日期</th>
+                  <th scope="col">公告類型</th>
+                  <th scope="col">標案名稱</th>
+                  <th scope="col">操作</th>
                 </tr>
               </thead>
               <tbody>
                 @for (notice of notices(); track $index) {
                   <tr
-                    class="cursor-pointer border-t border-slate-100 hover:bg-brand-light/40"
+                    class="cursor-pointer"
                     [class.bg-brand-light]="selected() === notice"
                     (click)="selectNotice(notice)"
                   >
-                    <td class="whitespace-nowrap p-3">{{ notice.noticeDate || '—' }}</td>
-                    <td class="p-3">{{ notice.noticeType || '—' }}</td>
-                    <td class="p-3">{{ notice.title || '—' }}</td>
-                    <td class="whitespace-nowrap p-3">
+                    <td class="whitespace-nowrap">{{ notice.noticeDate || '—' }}</td>
+                    <td>{{ notice.noticeType || '—' }}</td>
+                    <td>{{ notice.title || '—' }}</td>
+                    <td class="whitespace-nowrap">
                       <button
                         type="button"
-                        class="text-button text-brand"
+                        class="text-button gap-2 text-brand"
+                        [disabled]="saving()"
                         (click)="$event.stopPropagation(); selectNotice(notice)"
                       >
+                        <svg lucideFileInput [size]="16"></svg>
                         {{ selected() === notice ? '重新帶入' : '帶入明細' }}
                       </button>
                     </td>
@@ -124,11 +133,15 @@
             >
               <p>{{ detailError() }}</p>
               <button type="button" class="button button-secondary" (click)="selectNotice(notice)">
-                重試
+                <svg lucideRotateCw [size]="16"></svg>重試
               </button>
             </div>
           } @else if (detailLoaded()) {
-            <div [formGroup]="detailForm" class="grid gap-4 sm:grid-cols-2">
+            <fieldset
+              [formGroup]="detailForm"
+              class="grid gap-4 sm:grid-cols-2"
+              [disabled]="saving()"
+            >
               @for (field of fields; track field.key) {
                 <div
                   class="min-w-0"
@@ -143,22 +156,45 @@
                     [formControlName]="field.key"
                     placeholder="未提供"
                   />
+                  @if (
+                    detailForm.controls[field.key].touched && detailForm.controls[field.key].invalid
+                  ) {
+                    <p class="mt-1 text-xs text-red-600">請輸入{{ field.label }}，不可只填空白。</p>
+                  }
                 </div>
               }
-            </div>
+            </fieldset>
           }
         </section>
       }
     </div>
+    @if (saveError()) {
+      <p class="mx-6 mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+        {{ saveError() }}
+      </p>
+    }
     <footer
       class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4"
     >
-      <p class="text-xs text-slate-500">
-        目前僅查詢與帶入欄位，尚未儲存案件；關閉後不保留本次資料。
-      </p>
-      <button type="button" class="button dialog-button button-secondary" (click)="close()">
-        關閉
-      </button>
+      <p class="text-xs text-slate-500">請確認帶入的明細；按下儲存後會新增至政府標案列表。</p>
+      <div class="flex gap-3">
+        <button
+          type="button"
+          class="button dialog-button button-secondary"
+          [disabled]="saving()"
+          (click)="close()"
+        >
+          <svg lucideX [size]="16"></svg>取消
+        </button>
+        <button
+          type="button"
+          class="button dialog-button button-primary"
+          [disabled]="saving() || loadingDetail() || !detailLoaded()"
+          (click)="save()"
+        >
+          <svg lucideFileCheck [size]="16"></svg>{{ saving() ? '儲存中…' : '儲存政府標案' }}
+        </button>
+      </div>
     </footer>
   </div>
 </dialog>

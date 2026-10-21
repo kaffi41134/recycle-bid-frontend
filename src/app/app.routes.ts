@@ -3,8 +3,14 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: 'bids',
-    title: '投標案件管理',
+    title: '一般標案',
     loadComponent: () => import('./bids/bids').then((m) => m.Bids),
+  },
+  {
+    path: 'government-bids',
+    title: '政府標案',
+    loadComponent: () =>
+      import('./bids/government-bids/government-bids').then((m) => m.GovernmentBids),
   },
   {
     path: 'materials',

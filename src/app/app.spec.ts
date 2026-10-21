@@ -9,7 +9,8 @@ describe('App', () => {
       providers: [
         provideRouter([
           { path: 'materials', title: '回收品項管理', children: [] },
-          { path: 'bids', title: '投標案件管理', children: [] },
+          { path: 'bids', title: '一般標案', children: [] },
+          { path: 'government-bids', title: '政府標案', children: [] },
         ]),
       ],
     }).compileComponents();

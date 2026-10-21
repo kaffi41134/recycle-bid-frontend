@@ -120,12 +120,10 @@ describe('BidImport', () => {
   it('shows backend errors and allows retrying the same notice', () => {
     search();
     component.selectNotice(notice);
-    http
-      .expectOne('/api/bids/import/detail')
-      .flush('找不到指定公告，請重新查詢公告清單', {
-        status: 422,
-        statusText: 'Unprocessable Content',
-      });
+    http.expectOne('/api/bids/import/detail').flush('找不到指定公告，請重新查詢公告清單', {
+      status: 422,
+      statusText: 'Unprocessable Content',
+    });
     fixture.detectChanges();
     expect(component.detailError()).toContain('找不到指定公告');
     expect(component.loadingDetail()).toBe(false);
@@ -162,5 +160,48 @@ describe('BidImport', () => {
     expect(component.error()).toContain('第三方服務');
     search();
     expect(component.error()).toBe('');
+  });
+
+  it('saves confirmed edits to government bids only and emits after an empty success', () => {
+    let saved = 0;
+    component.saved.subscribe(() => saved++);
+    component.save();
+    http.expectNone('/api/government-bids');
+    search();
+    component.selectNotice(notice);
+    http.expectOne('/api/bids/import/detail').flush(detail);
+    component.detailForm.patchValue({ title: ' 修改後名稱 ', contactName: ' ' });
+    component.save();
+    component.save();
+    const request = http.expectOne('/api/government-bids');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({ ...detail, title: '修改後名稱', contactName: null });
+    component.close();
+    component.selectNotice(notice);
+    expect(fixture.nativeElement.querySelector('dialog').hasAttribute('open')).toBe(true);
+    http.expectNone('/api/bids/import/detail');
+    request.flush(null);
+    expect(saved).toBe(1);
+    expect(fixture.nativeElement.querySelector('dialog').hasAttribute('open')).toBe(false);
+    http.expectNone('/api/bids');
+  });
+
+  it('keeps imported user edits on save failure and validates the required detail fields', () => {
+    search();
+    component.selectNotice(notice);
+    http.expectOne('/api/bids/import/detail').flush(detail);
+    component.detailForm.controls.unitId.setValue(' ');
+    component.save();
+    http.expectNone('/api/government-bids');
+    component.detailForm.patchValue({ unitId: '3.7', title: '保留這份輸入' });
+    component.save();
+    http
+      .expectOne('/api/government-bids')
+      .flush('新增失敗', { status: 422, statusText: 'Unprocessable Content' });
+    expect(component.saveError()).toBe('新增失敗');
+    expect(component.detailForm.controls.title.value).toBe('保留這份輸入');
+    expect(component.saving()).toBe(false);
+    component.save();
+    http.expectOne('/api/government-bids').flush(null);
   });
 });

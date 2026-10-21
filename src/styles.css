@@ -96,7 +96,7 @@ button:disabled {
   height: 17px;
   flex-shrink: 0;
   color: #9ca3af;
-  transition: color .18s ease;
+  transition: color 0.18s ease;
 }
 .search-box:focus-within svg {
   color: #0f7b5f;
@@ -135,6 +135,75 @@ button:disabled {
   background: #fef2f2;
   color: #c34c4c;
 }
+
+/* Table CSS：所有表格共用的外框、表頭、儲存格與欄位樣式。 */
+@layer components {
+  .table-panel {
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+  }
+  .data-table {
+    width: 100%;
+    min-width: var(--table-min-width, 780px);
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: left;
+    font-size: 13px;
+    color: #334155;
+  }
+  .data-table th {
+    height: 44px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .data-table td {
+    height: 52px;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .data-table tbody tr:hover {
+    background: #f8fafc;
+  }
+  .table-nowrap td {
+    white-space: nowrap;
+  }
+  .table-code {
+    color: #155e75;
+  }
+  .table-date {
+    font-variant-numeric: tabular-nums;
+    color: #64748b;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+  .data-table td.table-description {
+    min-width: 180px;
+    max-width: 300px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  /* 需要固定右側操作欄時，於 th、td 加上 table-actions。 */
+  .data-table .table-actions {
+    position: sticky;
+    right: 0;
+    background: #fff;
+    text-align: left;
+  }
+  .data-table th.table-actions {
+    background: #f8fafc;
+  }
+  .data-table .table-actions > div {
+    justify-content: flex-start;
+  }
+}
+/* Table CSS 結束 */
 
 @layer components {
   .panel {

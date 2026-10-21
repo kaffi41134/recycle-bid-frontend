@@ -55,7 +55,7 @@ describe('Bids', () => {
 
   it('renders all business columns, decimal quantity and null placeholders', () => {
     const element = fixture.nativeElement as HTMLElement;
-    expect(element.querySelectorAll('th').length).toBe(13);
+    expect(element.querySelectorAll('.data-table')[0].querySelectorAll('th').length).toBe(13);
     expect(element.querySelector('tbody')?.textContent).toContain('12.5');
     expect(element.querySelector('tbody')?.textContent).toContain('—');
     expect(element.querySelectorAll('.action-button').length).toBe(2);
@@ -111,6 +111,11 @@ describe('Bids', () => {
     expect(request.request.body.createdAt).toBeUndefined();
     request.flush({ ...item, id: 2, bidNo: 'A002', quantity: 3.75 });
     expect(component.bids()[0].bidNo).toBe('A002');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.data-table').textContent).toContain('A002');
+    expect(fixture.nativeElement.querySelector('dialog.bid-editor').hasAttribute('open')).toBe(
+      false,
+    );
     component.openCreate();
     expect(component.bidForm.controls.quantity.value).toBeNull();
   });
@@ -154,5 +159,19 @@ describe('Bids', () => {
     http.expectOne('/api/bids').flush([]);
     expect(component.error()).toBe('');
     expect(component.bids()).toEqual([]);
+  });
+
+  it('shows only the general bids table and preserves the create dialog', () => {
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelectorAll('.data-table').length).toBe(1);
+    expect(element.querySelector('h1')?.textContent).toContain('一般標案');
+    expect(element.querySelector('app-government-bids')).toBeNull();
+    http.expectNone('/api/government-bids');
+    const createButton = element.querySelector('.add-bid') as HTMLButtonElement;
+    expect(createButton.textContent).toContain('新增標案');
+    createButton.click();
+    fixture.detectChanges();
+    expect(element.querySelector('dialog.bid-editor')?.hasAttribute('open')).toBe(true);
+    expect(component.bids()).toEqual([item]);
   });
 });

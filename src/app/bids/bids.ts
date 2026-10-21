@@ -17,7 +17,6 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@
 import { finalize } from 'rxjs';
 import { Bid, BidRequest } from './bid.model';
 import { BidService } from './bid.service';
-import { BidImport } from './bid-import/bid-import';
 import { Pagination } from '../shared/pagination/pagination';
 import {
   LucideFileCheck,
@@ -32,7 +31,6 @@ import {
 @Component({
   selector: 'app-bids',
   imports: [
-    BidImport,
     ReactiveFormsModule,
     DatePipe,
     Pagination,
