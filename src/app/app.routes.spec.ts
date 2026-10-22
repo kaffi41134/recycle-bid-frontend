@@ -17,6 +17,17 @@ describe('Bid routes', () => {
 
   afterEach(() => http.verify());
 
+  it('navigates from government bids to materials', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/government-bids');
+    http.expectOne('/api/government-bids').flush([]);
+
+    await harness.navigateByUrl('/materials');
+    http.expectOne('/api/materials').flush([]);
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('回收品項管理');
+  }, 120_000);
+
   it('loads general bids without requesting government bids', async () => {
     const harness = await RouterTestingHarness.create();
     await harness.navigateByUrl('/bids');

@@ -109,10 +109,10 @@
 .sidebar-nav:hover .hl-ready {
   opacity: 1;
 }
-.nav-item {
+.button-nav {
   position: relative;
   display: flex;
-  align-items: center;
+  justify-content: flex-start;
   min-height: 40px;
   padding: 8px 20px 8px 8px;
   border-left: 4px solid transparent;
@@ -140,10 +140,10 @@
     transform 260ms ease 80ms,
     visibility 0s linear;
 }
-.nav-entry:hover .nav-item {
+.nav-entry:hover .button-nav {
   color: #fff;
 }
-.nav-item:disabled {
+.button-nav:disabled {
   opacity: 0.8;
 }
 .nav-active {
@@ -177,7 +177,7 @@
     padding-right: 0;
     padding-left: 0;
   }
-  .sidebar-collapsed .nav-item {
+  .sidebar-collapsed .button-nav {
     justify-content: center;
     gap: 0;
     padding-right: 8px;

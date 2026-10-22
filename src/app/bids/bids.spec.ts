@@ -58,7 +58,7 @@ describe('Bids', () => {
     expect(element.querySelectorAll('.data-table')[0].querySelectorAll('th').length).toBe(13);
     expect(element.querySelector('tbody')?.textContent).toContain('12.5');
     expect(element.querySelector('tbody')?.textContent).toContain('—');
-    expect(element.querySelectorAll('.action-button').length).toBe(2);
+    expect(element.querySelectorAll('.button-action').length).toBe(2);
   });
 
   it('searches optional fields safely and resets pagination', () => {
@@ -95,7 +95,9 @@ describe('Bids', () => {
     component.openCreate();
     fixture.detectChanges();
     component.bidForm.controls.bidNo.setValue(' A002 ');
-    const input = fixture.nativeElement.querySelector('#bid-quantity') as HTMLInputElement;
+    const input = fixture.nativeElement.querySelector(
+      '[formControlName="quantity"]',
+    ) as HTMLInputElement;
     input.value = '3.75';
     input.dispatchEvent(new Event('input'));
     component.save();
@@ -137,7 +139,8 @@ describe('Bids', () => {
 
   it('keeps a row on delete failure and removes it only after success', () => {
     component.askDelete(item);
-    component.confirmDelete();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('app-delete-dialog .button-danger').click();
     http
       .expectOne('/api/bids/1')
       .flush('刪除失敗', { status: 422, statusText: 'Unprocessable Content' });
@@ -167,7 +170,9 @@ describe('Bids', () => {
     expect(element.querySelector('h1')?.textContent).toContain('一般標案');
     expect(element.querySelector('app-government-bids')).toBeNull();
     http.expectNone('/api/government-bids');
-    const createButton = element.querySelector('.add-bid') as HTMLButtonElement;
+    const createButton = Array.from(element.querySelectorAll('button')).find((button) =>
+      button.textContent?.includes('新增標案'),
+    )!;
     expect(createButton.textContent).toContain('新增標案');
     createButton.click();
     fixture.detectChanges();

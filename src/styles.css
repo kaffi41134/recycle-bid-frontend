@@ -5,6 +5,8 @@
 @theme {
   --color-brand: #105337;
   --color-brand-light: #e0f3e7;
+  --color-primary: #047857;
+  --color-primary-hover: #065f46;
 }
 body {
   margin: 0;
@@ -33,6 +35,51 @@ button:disabled {
 :focus-visible {
   outline: 3px solid #69b990;
   outline-offset: 3px;
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 20px 24px;
+  margin-bottom: 24px;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.filter-select label {
+  color: #64748b;
+}
+.filter-select select {
+  min-width: 84px;
+}
+@media (max-width: 639px) {
+  .filter-bar > :first-child {
+    flex-basis: 100%;
+  }
+}
+.form-dialog {
+  width: min(var(--form-dialog-width, 480px), calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  border: 1px solid #d9e3dd;
+  border-radius: 16px;
+  background: #fff;
+  color: #183c36;
+  box-shadow: 0 24px 80px #102f2c30;
+}
+.form-dialog::backdrop {
+  background: #102f2c66;
+  backdrop-filter: blur(3px);
 }
 
 .input-control {
@@ -100,40 +147,6 @@ button:disabled {
 }
 .search-box:focus-within svg {
   color: #0f7b5f;
-}
-.dialog-button {
-  min-height: 38px;
-  padding: 0 22px;
-  border-radius: 7px;
-  font-size: 14px;
-}
-.dialog-button svg {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-}
-.dialog-button.button-primary {
-  min-width: 108px;
-}
-.action-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 28px;
-  border-radius: 5px;
-  color: #94a3b8;
-  transition:
-    background 150ms,
-    color 150ms;
-}
-.action-button:hover {
-  background: #e3f3e9;
-  color: #197e50;
-}
-.action-delete:hover {
-  background: #fef2f2;
-  color: #c34c4c;
 }
 
 /* Table CSS：所有表格共用的外框、表頭、儲存格與欄位樣式。 */
@@ -210,21 +223,52 @@ button:disabled {
     @apply rounded-2xl border border-[#e2ebe6] bg-white shadow-[0_5px_22px_#173f3505];
   }
   .button {
-    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition disabled:opacity-40;
+    @apply inline-flex shrink-0 items-center justify-center gap-1.5 transition disabled:opacity-40;
+  }
+  .button svg {
+    @apply shrink-0;
+  }
+  .button-primary,
+  .button-secondary,
+  .button-danger {
+    @apply min-h-[38px] min-w-[108px] rounded-[7px] px-[22px] text-sm font-semibold;
+  }
+  .button-primary svg,
+  .button-secondary svg,
+  .button-danger svg {
+    @apply size-[17px];
   }
   .button-primary {
-    @apply bg-[#047857] text-white hover:bg-[#065f46];
+    @apply bg-primary text-white hover:bg-primary-hover;
   }
-  .button-add {
-    @apply bg-[#13843e] text-white hover:bg-[#0b6f32];
+  .checkbox {
+    @apply size-4 cursor-pointer accent-primary transition hover:accent-primary-hover disabled:cursor-not-allowed disabled:opacity-40;
   }
   .button-secondary {
     @apply border border-[#d9e3dd] bg-white text-[#24463b] hover:bg-[#f3f7f5];
   }
-  .text-button {
-    @apply inline-flex min-h-9 px-2 items-center justify-center rounded-lg hover:bg-slate-100;
+  .button-danger {
+    @apply bg-[#d95e5e] text-white hover:bg-[#c34c4c];
+  }
+  .button-text {
+    @apply min-h-9 rounded-lg px-2 hover:bg-slate-100;
+  }
+  .button-reset {
+    @apply h-8 rounded-[7px] border border-[#e2e8f0] bg-[#f8fafc] px-3 text-[13px] text-[#475569] hover:bg-[#f1f5f9];
+  }
+  .button-action {
+    @apply h-7 w-[26px] rounded-[5px] text-[#94a3b8] hover:bg-[#e3f3e9] hover:text-[#197e50];
+  }
+  .button-action-delete:hover {
+    @apply bg-[#fef2f2] text-[#c34c4c];
+  }
+  .button-overlay {
+    @apply fixed inset-0 z-30 bg-black/30;
   }
   .field-label {
     @apply mb-2 block text-sm font-semibold;
+  }
+  .count-badge {
+    @apply rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand;
   }
 }

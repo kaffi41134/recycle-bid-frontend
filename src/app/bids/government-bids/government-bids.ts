@@ -15,6 +15,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize, Subject, takeUntil } from 'rxjs';
 import {
+  LucideUndo2,
   LucideX,
   LucideFileCheck,
   LucideFileText,
@@ -28,6 +29,7 @@ import { GovernmentBid, governmentBidFields } from './government-bid.model';
 import { GovernmentBidService } from './government-bid.service';
 import { createGovernmentBidForm, toGovernmentBidRequest } from './government-bid.form';
 import { BidImport } from '../bid-import/bid-import';
+import { DeleteDialog } from '../../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../../shared/pagination/pagination';
 
 @Component({
@@ -37,6 +39,8 @@ import { Pagination } from '../../shared/pagination/pagination';
     DatePipe,
     BidImport,
     Pagination,
+    DeleteDialog,
+    LucideUndo2,
     LucideX,
     LucideFileCheck,
     LucideFileText,
@@ -55,8 +59,11 @@ export class GovernmentBids implements OnInit {
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly destroyRef = inject(DestroyRef);
   private readonly editor = viewChild.required<ElementRef<HTMLDialogElement>>('editor');
-  private readonly deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteDialog');
+  private readonly deleteDialog = viewChild.required(DeleteDialog);
   private readonly cancelDetail = new Subject<void>();
+  private readonly cancelLoad = new Subject<void>();
+  private createdDateFrom = '';
+  private createdDateTo = '';
 
   readonly fields = governmentBidFields;
   readonly columns = governmentBidFields.filter(({ key }) =>
@@ -85,7 +92,8 @@ export class GovernmentBids implements OnInit {
   readonly pendingDelete = signal<GovernmentBid | null>(null);
   readonly page = signal(1);
   readonly pageSize = signal(10);
-  readonly searchForm = this.fb.group({ keyword: '' });
+  readonly searchForm = this.fb.group({ keyword: '', createdDateFrom: '', createdDateTo: '' });
+  readonly searchError = signal('');
   readonly keyword = signal('');
   readonly bidForm = createGovernmentBidForm(this.fb);
   readonly filteredBids = computed(() => {
@@ -109,12 +117,13 @@ export class GovernmentBids implements OnInit {
   }
 
   loadBids() {
-    if (this.loading()) return;
+    this.cancelLoad.next();
     this.loading.set(true);
     this.error.set('');
     this.service
-      .findAll()
+      .findAll(this.createdDateFrom, this.createdDateTo)
       .pipe(
+        takeUntil(this.cancelLoad),
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.loading.set(false)),
       )
@@ -124,14 +133,24 @@ export class GovernmentBids implements OnInit {
       });
   }
 
-  search() {
+  search(reload = true) {
     this.keyword.set(this.searchForm.controls.keyword.value);
     this.page.set(1);
+    const { createdDateFrom, createdDateTo } = this.searchForm.getRawValue();
+    if (createdDateFrom && createdDateTo && createdDateFrom > createdDateTo) {
+      this.searchError.set('建立日期起日不可晚於迄日');
+      return;
+    }
+    this.searchError.set('');
+    if (createdDateFrom === this.createdDateFrom && createdDateTo === this.createdDateTo) return;
+    this.createdDateFrom = createdDateFrom;
+    this.createdDateTo = createdDateTo;
+    if (reload) this.loadBids();
   }
 
-  resetSearch() {
-    this.searchForm.reset();
-    this.search();
+  resetSearch(reload = true) {
+    this.searchForm.reset(undefined, { emitEvent: false });
+    this.search(reload);
   }
 
   openCreate() {
@@ -204,7 +223,7 @@ export class GovernmentBids implements OnInit {
       .subscribe({
         next: () => {
           this.editor().nativeElement.close();
-          if (this.mode() === 'create') this.resetSearch();
+          if (this.mode() === 'create') this.resetSearch(false);
           this.notice.set(this.mode() === 'create' ? '政府標案已新增。' : '政府標案已更新。');
           this.loadBids();
         },
@@ -213,7 +232,7 @@ export class GovernmentBids implements OnInit {
   }
 
   onImported() {
-    this.resetSearch();
+    this.resetSearch(false);
     this.notice.set('公告已儲存為政府標案。');
     this.loadBids();
   }
@@ -221,11 +240,7 @@ export class GovernmentBids implements OnInit {
   askDelete(item: GovernmentBid) {
     this.pendingDelete.set(item);
     this.deleteError.set('');
-    this.deleteDialog().nativeElement.showModal();
-  }
-
-  closeDelete() {
-    if (!this.deleting()) this.deleteDialog().nativeElement.close();
+    this.deleteDialog().open();
   }
 
   confirmDelete() {
@@ -249,7 +264,7 @@ export class GovernmentBids implements OnInit {
             ),
           );
           this.notice.set('政府標案已刪除。');
-          this.deleteDialog().nativeElement.close();
+          this.deleteDialog().close();
         },
         error: (error: HttpErrorResponse) => this.deleteError.set(this.errorMessage(error)),
       });

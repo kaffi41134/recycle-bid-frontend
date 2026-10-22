@@ -17,6 +17,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@
 import { finalize } from 'rxjs';
 import { Bid, BidRequest } from './bid.model';
 import { BidService } from './bid.service';
+import { DeleteDialog } from '../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../shared/pagination/pagination';
 import {
   LucideFileCheck,
@@ -25,6 +26,7 @@ import {
   LucideRotateCw,
   LucideSearch,
   LucideTrash,
+  LucideUndo2,
   LucideX,
 } from '@lucide/angular';
 
@@ -34,12 +36,14 @@ import {
     ReactiveFormsModule,
     DatePipe,
     Pagination,
+    DeleteDialog,
     LucideFileCheck,
     LucidePencil,
     LucidePlus,
     LucideRotateCw,
     LucideSearch,
     LucideTrash,
+    LucideUndo2,
     LucideX,
   ],
   templateUrl: './bids.html',
@@ -52,7 +56,7 @@ export class Bids implements OnInit {
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly destroyRef = inject(DestroyRef);
   private readonly editor = viewChild.required<ElementRef<HTMLDialogElement>>('editor');
-  private readonly deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>('deleteDialog');
+  private readonly deleteDialog = viewChild.required(DeleteDialog);
 
   readonly bids = signal<Bid[]>([]);
   readonly loading = signal(false);
@@ -271,11 +275,7 @@ export class Bids implements OnInit {
   askDelete(item: Bid) {
     this.pendingDelete.set(item);
     this.deleteError.set('');
-    this.deleteDialog().nativeElement.showModal();
-  }
-
-  closeDelete() {
-    if (!this.deleting()) this.deleteDialog().nativeElement.close();
+    this.deleteDialog().open();
   }
 
   confirmDelete() {
@@ -293,7 +293,7 @@ export class Bids implements OnInit {
         next: () => {
           this.bids.update((items) => items.filter((entry) => entry.id !== item.id));
           this.page.set(this.currentPage());
-          this.deleteDialog().nativeElement.close();
+          this.deleteDialog().close();
         },
         error: (error: HttpErrorResponse) => this.deleteError.set(this.errorMessage(error)),
       });

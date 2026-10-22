@@ -5,7 +5,7 @@
       <div class="mb-4 flex items-center gap-2">
         <button
           type="button"
-          class="text-button lg:hidden"
+          class="button button-text lg:hidden"
           [attr.aria-expanded]="sidebarOpen()"
           (click)="sidebarExpanded.set(true); sidebarOpen.set(!sidebarOpen())"
         >
@@ -13,7 +13,7 @@
         </button>
         <button
           type="button"
-          class="text-button hidden lg:inline-flex"
+          class="button button-text hidden lg:inline-flex"
           [attr.aria-expanded]="sidebarExpanded()"
           [title]="sidebarExpanded() ? '收合側邊選單' : '展開側邊選單'"
           (click)="sidebarExpanded.update((expanded) => !expanded)"

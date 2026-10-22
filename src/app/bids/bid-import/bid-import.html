@@ -11,7 +11,7 @@
       </div>
       <button
         type="button"
-        class="text-button shrink-0 gap-2"
+        class="button button-text shrink-0 gap-2"
         [disabled]="saving()"
         (click)="close()"
       >
@@ -54,7 +54,7 @@
           </div>
           <button
             type="submit"
-            class="button dialog-button button-primary sm:mt-7"
+            class="button button-primary sm:mt-7"
             [disabled]="searching() || saving()"
           >
             <svg lucideSearch [size]="16"></svg>{{ searching() ? '查詢中…' : '查詢公告' }}
@@ -62,12 +62,10 @@
         </fieldset>
       </form>
       @if (error()) {
-        <p class="rounded-lg bg-red-50 p-3 text-red-700" role="alert">
-          {{ error() }} 請調整條件或再次查詢。
-        </p>
+        <p class="rounded-lg bg-red-50 p-3 text-red-700">{{ error() }} 請調整條件或再次查詢。</p>
       }
       @if (searching()) {
-        <p class="py-6 text-center text-slate-500" role="status">正在查詢公告清單…</p>
+        <p class="py-6 text-center text-slate-500">正在查詢公告清單…</p>
       } @else if (searched()) {
         <section>
           <h3 class="mb-3 font-semibold">
@@ -78,10 +76,10 @@
             <table class="data-table w-full min-w-[600px] text-left">
               <thead>
                 <tr>
-                  <th scope="col">公告日期</th>
-                  <th scope="col">公告類型</th>
-                  <th scope="col">標案名稱</th>
-                  <th scope="col">操作</th>
+                  <th>公告日期</th>
+                  <th>公告類型</th>
+                  <th>標案名稱</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,7 +95,7 @@
                     <td class="whitespace-nowrap">
                       <button
                         type="button"
-                        class="text-button gap-2 text-brand"
+                        class="button button-text gap-2 text-brand"
                         [disabled]="saving()"
                         (click)="$event.stopPropagation(); selectNotice(notice)"
                       >
@@ -125,11 +123,10 @@
             {{ notice.noticeDate }} · {{ notice.noticeType }} · {{ notice.title }}
           </p>
           @if (loadingDetail()) {
-            <p class="py-6 text-center text-slate-500" role="status">正在載入並帶入公告明細…</p>
+            <p class="py-6 text-center text-slate-500">正在載入並帶入公告明細…</p>
           } @else if (detailError()) {
             <div
               class="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-3 text-red-700"
-              role="alert"
             >
               <p>{{ detailError() }}</p>
               <button type="button" class="button button-secondary" (click)="selectNotice(notice)">
@@ -169,7 +166,7 @@
       }
     </div>
     @if (saveError()) {
-      <p class="mx-6 mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+      <p class="mx-6 mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
         {{ saveError() }}
       </p>
     }
@@ -180,15 +177,15 @@
       <div class="flex gap-3">
         <button
           type="button"
-          class="button dialog-button button-secondary"
+          class="button button-secondary"
           [disabled]="saving()"
           (click)="close()"
         >
-          <svg lucideX [size]="16"></svg>取消
+          <svg lucideUndo2></svg>取消
         </button>
         <button
           type="button"
-          class="button dialog-button button-primary"
+          class="button button-primary"
           [disabled]="saving() || loadingDetail() || !detailLoaded()"
           (click)="save()"
         >

@@ -61,7 +61,7 @@ describe('Materials', () => {
   it('renders the API timestamp and edit/delete buttons', () => {
     const element = fixture.nativeElement as HTMLElement;
     expect(element.querySelector('time')?.textContent).toBe('2026-10-14 16:30');
-    expect(element.querySelectorAll('.action-button').length).toBe(4);
+    expect(element.querySelectorAll('.button-action').length).toBe(4);
   });
 
   it('combines keyword, category and status filters and resets them', () => {
@@ -112,7 +112,8 @@ describe('Materials', () => {
     component.pageSize.set(1);
     component.page.set(2);
     component.askDelete(items[1]);
-    component.confirmDelete();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('app-delete-dialog .button-danger').click();
     expect(component.materials().length).toBe(2);
     const request = http.expectOne('/api/materials/2');
     expect(request.request.method).toBe('DELETE');

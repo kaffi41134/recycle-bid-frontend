@@ -7,8 +7,11 @@ export class GovernmentBidService {
   private readonly http = inject(HttpClient);
   private readonly url = '/api/government-bids';
 
-  findAll() {
-    return this.http.get<GovernmentBid[]>(this.url);
+  findAll(createdDateFrom = '', createdDateTo = '') {
+    const params: Record<string, string> = {};
+    if (createdDateFrom) params['createdDateFrom'] = createdDateFrom;
+    if (createdDateTo) params['createdDateTo'] = createdDateTo;
+    return this.http.get<GovernmentBid[]>(this.url, { params });
   }
 
   findById(id: number) {

@@ -1,7 +1,7 @@
 @if (open()) {
   <button
     type="button"
-    class="fixed inset-0 z-30 bg-black/30 lg:hidden"
+    class="button button-overlay lg:hidden"
     (click)="open.set(false)"
   ></button>
 }
@@ -34,7 +34,7 @@
             [routerLink]="item.route"
             routerLinkActive="nav-active"
             ariaCurrentWhenActive="page"
-            class="nav-item gap-3"
+            class="button button-nav gap-3"
             [title]="!isExpanded() ? item.label : null"
             (click)="open.set(false)"
           >
@@ -44,7 +44,7 @@
         } @else {
           <button
             type="button"
-            class="nav-item w-full gap-3 text-left"
+            class="button button-nav w-full gap-3 text-left"
             disabled
             [title]="isExpanded() ? '此功能尚未建置' : item.label + '（此功能尚未建置）'"
           >

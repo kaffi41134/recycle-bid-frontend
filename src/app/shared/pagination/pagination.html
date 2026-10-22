@@ -24,7 +24,7 @@
     <nav class="pagination">
       <button
         type="button"
-        class="page-button"
+        class="button button-page"
         [disabled]="currentPage() === 1"
         aria-label="上一頁"
         (click)="goToPage(currentPage() - 1)"
@@ -35,7 +35,7 @@
       @for (number of pageNumbers(); track number) {
         <button
           type="button"
-          class="page-button"
+          class="button button-page"
           [class.page-active]="number === currentPage()"
           [attr.aria-current]="number === currentPage() ? 'page' : null"
           (click)="goToPage(number)"
@@ -46,7 +46,7 @@
 
       <button
         type="button"
-        class="page-button"
+        class="button button-page"
         [disabled]="currentPage() === pageCount()"
         aria-label="下一頁"
         (click)="goToPage(currentPage() + 1)"

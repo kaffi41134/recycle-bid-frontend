@@ -1,14 +1,8 @@
 <section class="mb-5 flex flex-wrap items-center justify-between gap-4">
   <div class="min-w-0">
     <div class="flex flex-wrap items-center gap-3">
-      <h1 id="page-title" class="text-[22px] font-bold leading-7 tracking-tight text-[#0f172a]">
-        回收品項管理
-      </h1>
-      <span
-        class="rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand"
-      >
-        啟用中: {{ enabledCount() }} / {{ materials().length }} 項
-      </span>
+      <h1 class="text-[22px] font-bold leading-7 tracking-tight text-[#0f172a]">回收品項管理</h1>
+      <span class="count-badge"> 啟用中: {{ enabledCount() }} / {{ materials().length }} 項 </span>
     </div>
     <p class="mt-1 text-xs leading-5 text-[#64748b]">
       管理各類廢銅、廢鋁、廢鋼鐵與貴金屬回收標的之規格設定與即時計價基準。
@@ -16,32 +10,23 @@
   </div>
   <button
     type="button"
-    class="button dialog-button button-primary add-material"
+    class="button button-primary"
     [disabled]="loading() || !!error()"
     (click)="openCreate()"
   >
-    <svg lucidePlus [size]="16"></svg>新增品項
+    <svg lucidePlus></svg>新增品項
   </button>
 </section>
 
 <section [attr.aria-busy]="loading()">
-  <h2 id="list-title" class="sr-only">回收品項列表</h2>
   <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
-    <div class="min-w-0 flex-1">
-      <label for="keyword" class="sr-only">關鍵字搜尋</label>
-      <div class="search-box input-control">
-        <svg lucideSearch [size]="17"></svg>
-        <input
-          id="keyword"
-          type="search"
-          formControlName="keyword"
-          placeholder="輸入品項名稱或代碼"
-        />
-      </div>
+    <div class="search-box input-control min-w-0 flex-1">
+      <svg lucideSearch [size]="17"></svg>
+      <input type="search" formControlName="keyword" placeholder="輸入品項名稱或代碼" />
     </div>
     <div class="filter-select">
-      <label for="category">分類</label
-      ><select id="category" class="select-input input-control" formControlName="category">
+      <label>分類</label>
+      <select class="select-input input-control" formControlName="category">
         <option value="">全部類別</option>
         @for (category of categories; track category) {
           <option [value]="category">{{ category }}</option>
@@ -49,14 +34,14 @@
       </select>
     </div>
     <div class="filter-select">
-      <label for="status">狀態</label
-      ><select id="status" class="select-input input-control" formControlName="status">
+      <label>狀態</label>
+      <select class="select-input input-control" formControlName="status">
         <option value="">全部狀態</option>
         <option value="enabled">啟用</option>
         <option value="disabled">停用</option>
       </select>
     </div>
-    <button type="button" class="reset-button" (click)="resetSearch()">
+    <button type="button" class="button button-reset" (click)="resetSearch()">
       <svg lucideRotateCw [size]="15"></svg>重設
     </button>
     <span class="whitespace-nowrap text-[13px] text-[#64748b]"
@@ -70,7 +55,6 @@
     @if (error()) {
       <div
         class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
-        role="alert"
       >
         <p>{{ error() }}</p>
         <button type="button" class="button button-secondary" (click)="loadMaterials()">
@@ -82,21 +66,19 @@
         <table class="data-table w-full min-w-[780px] text-left">
           <thead>
             <tr>
-              <th scope="col">品項代碼</th>
-              <th scope="col">品項名稱</th>
-              <th scope="col">分類</th>
-              <th scope="col">計價單位</th>
-              <th scope="col">狀態</th>
-              <th scope="col">建立時間</th>
-              <th scope="col">操作</th>
+              <th>品項代碼</th>
+              <th>品項名稱</th>
+              <th>分類</th>
+              <th>計價單位</th>
+              <th>狀態</th>
+              <th>建立時間</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
             @if (loading()) {
               <tr>
-                <td colspan="7" class="!py-14 text-center text-slate-500" role="status">
-                  正在載入品項資料…
-                </td>
+                <td colspan="7" class="!py-14 text-center text-slate-500">正在載入品項資料…</td>
               </tr>
             } @else {
               @for (item of visibleMaterials(); track item.id) {
@@ -130,14 +112,14 @@
                     <div class="flex gap-2">
                       <button
                         type="button"
-                        class="action-button"
+                        class="button button-action"
                         [attr.title]="'編輯' + item.name"
                         (click)="openEdit(item)"
                       >
                         <svg lucidePencil [size]="14"></svg></button
                       ><button
                         type="button"
-                        class="action-button action-delete"
+                        class="button button-action button-action-delete"
                         [attr.title]="'刪除' + item.name"
                         (click)="askDelete(item)"
                       >
@@ -170,124 +152,112 @@
 </section>
 
 <dialog #editor class="form-dialog" (cancel)="saving() && $event.preventDefault()">
-  <form [formGroup]="materialForm" (ngSubmit)="save()" class="p-6 md:p-7">
-    <div class="mb-6 flex items-center justify-between">
-      <h2 id="editor-title" class="text-xl font-bold">{{ editing() ? '編輯品項' : '新增品項' }}</h2>
-      <button type="button" class="text-button" [disabled]="saving()" (click)="closeEditor()">
-        關閉
-      </button>
-    </div>
-    <p class="mb-5 rounded-lg bg-[#f3f7f5] px-3 py-2 text-sm text-[#688076]">
-      品項代碼：{{ editing()?.code || '由系統自動產生' }}
-    </p>
-    <div class="space-y-5">
-      <div>
-        <label for="material-name" class="field-label"
-          >品項名稱 <span class="text-red-600">*</span></label
-        ><input
-          id="material-name"
-          class="field input-control"
-          formControlName="name"
-          placeholder="例如：廢紅銅"
-          [attr.aria-invalid]="
-            materialForm.controls.name.touched && materialForm.controls.name.invalid
-          "
-          aria-describedby="name-error"
-        />
-        @if (materialForm.controls.name.touched && materialForm.controls.name.invalid) {
-          <p id="name-error" class="mt-1 text-xs text-red-600">請輸入品項名稱，不可只填空白。</p>
-        }
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label for="material-category" class="field-label"
-            >分類 <span class="text-red-600">*</span></label
-          ><select id="material-category" class="field input-control" formControlName="category">
-            @for (category of categories; track category) {
-              <option [value]="category">{{ category }}</option>
-            }
-          </select>
-        </div>
-        <div>
-          <label for="material-unit" class="field-label"
-            >單位 <span class="text-red-600">*</span></label
-          ><input
-            id="material-unit"
-            class="field input-control"
-            formControlName="unit"
-            placeholder="例如：KG"
-            [attr.aria-invalid]="
-              materialForm.controls.unit.touched && materialForm.controls.unit.invalid
-            "
-            aria-describedby="unit-error"
-          />
-          @if (materialForm.controls.unit.touched && materialForm.controls.unit.invalid) {
-            <p id="unit-error" class="mt-1 text-xs text-red-600">請輸入單位。</p>
-          }
-        </div>
-      </div>
-      <label class="flex items-center gap-3"
-        ><input
-          type="checkbox"
-          class="size-4 accent-brand"
-          formControlName="enabled"
-        />啟用品項</label
-      >
-      @if (editing()?.createdAt) {
-        <p class="text-xs text-[#73867c]">
-          建立時間：{{ editing()?.createdAt | date: 'yyyy-MM-dd HH:mm' }}
-        </p>
-      }
-      @if (formError()) {
-        <p class="rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">{{ formError() }}</p>
-      }
-    </div>
-    <div class="mt-7 flex justify-end gap-3">
+  <form
+    [formGroup]="materialForm"
+    (ngSubmit)="save()"
+    class="flex max-h-[calc(100dvh-48px)] flex-col"
+  >
+    <header
+      class="flex shrink-0 items-center justify-between gap-3 border-b border-[#c1d1c9] px-6 py-4"
+    >
+      <h2 class="text-xl font-bold">{{ editing() ? '編輯品項' : '新增品項' }}</h2>
       <button
         type="button"
-        class="button dialog-button button-secondary"
+        class="button button-text"
         [disabled]="saving()"
         (click)="closeEditor()"
       >
-        <svg lucideX></svg>
+        <svg lucideX [size]="16"></svg>
+        關閉
+      </button>
+    </header>
+    <div class="min-h-0 overflow-y-auto p-6">
+      <p class="mb-5 rounded-lg bg-[#f3f7f5] px-3 py-2 text-sm text-[#688076]">
+        品項代碼：{{ editing()?.code || '由系統自動產生' }}
+      </p>
+      <div class="space-y-5">
+        <div>
+          <label for="material-name" class="field-label"
+            >品項名稱 <span class="text-red-600">*</span></label
+          ><input
+            id="material-name"
+            class="field input-control"
+            formControlName="name"
+            placeholder="例如：廢紅銅"
+            [attr.aria-invalid]="
+              materialForm.controls.name.touched && materialForm.controls.name.invalid
+            "
+            aria-describedby="name-error"
+          />
+          @if (materialForm.controls.name.touched && materialForm.controls.name.invalid) {
+            <p id="name-error" class="mt-1 text-xs text-red-600">請輸入品項名稱，不可只填空白。</p>
+          }
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="field-label">分類 <span class="text-red-600">*</span></label
+            ><select class="field input-control" formControlName="category">
+              @for (category of categories; track category) {
+                <option [value]="category">{{ category }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label for="material-unit" class="field-label"
+              >單位 <span class="text-red-600">*</span></label
+            ><input
+              id="material-unit"
+              class="field input-control"
+              formControlName="unit"
+              placeholder="例如：KG"
+              [attr.aria-invalid]="
+                materialForm.controls.unit.touched && materialForm.controls.unit.invalid
+              "
+              aria-describedby="unit-error"
+            />
+            @if (materialForm.controls.unit.touched && materialForm.controls.unit.invalid) {
+              <p id="unit-error" class="mt-1 text-xs text-red-600">請輸入單位。</p>
+            }
+          </div>
+        </div>
+        <label class="flex items-center gap-3"
+          ><input type="checkbox" class="checkbox" formControlName="enabled" />啟用品項</label
+        >
+        @if (editing()?.createdAt) {
+          <p class="text-xs text-[#73867c]">
+            建立時間：{{ editing()?.createdAt | date: 'yyyy-MM-dd HH:mm' }}
+          </p>
+        }
+        @if (formError()) {
+          <p class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ formError() }}</p>
+        }
+      </div>
+    </div>
+    <footer class="flex shrink-0 justify-end gap-3 border-t border-[#c1d1c9] px-6 py-4">
+      <button
+        type="button"
+        class="button button-secondary"
+        [disabled]="saving()"
+        (click)="closeEditor()"
+      >
+        <svg lucideUndo2></svg>
         取消
       </button>
-      <button type="submit" class="button dialog-button button-primary" [disabled]="saving()">
+      <button type="submit" class="button button-primary" [disabled]="saving()">
         <svg lucideFileCheck></svg>
         {{ saving() ? '儲存中…' : '儲存品項' }}
       </button>
-    </div>
+    </footer>
   </form>
 </dialog>
 
-<dialog #deleteDialog class="form-dialog" (cancel)="deleting() && $event.preventDefault()">
-  <div class="p-7">
-    <h2 id="delete-title" class="text-xl font-bold">刪除回收品項</h2>
-    <p class="mt-3 leading-6 text-[#688076]">
-      確定刪除「{{ pendingDelete()?.name }}」（{{ pendingDelete()?.code }}）嗎？刪除後無法復原。
-    </p>
-    @if (deleteError()) {
-      <p class="mt-4 rounded-lg bg-red-50 p-3 text-red-700" role="alert">{{ deleteError() }}</p>
-    }
-    <div class="mt-7 flex justify-end gap-3">
-      <button
-        type="button"
-        class="button dialog-button button-secondary"
-        [disabled]="deleting()"
-        (click)="closeDelete()"
-      >
-        <svg lucideX></svg>
-        取消
-      </button>
-      <button
-        type="button"
-        class="button dialog-button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
-        [disabled]="deleting()"
-        (click)="confirmDelete()"
-      >
-        <svg lucideTrash></svg>
-        {{ deleting() ? '刪除中…' : '確認刪除' }}
-      </button>
-    </div>
-  </div>
-</dialog>
+<app-delete-dialog
+  #deleteDialog
+  title="刪除回收品項"
+  [message]="
+    '確定刪除「' + pendingDelete()?.name + '」（' + pendingDelete()?.code + '）嗎？刪除後無法復原。'
+  "
+  [deleting]="deleting()"
+  [error]="deleteError()"
+  (confirmed)="confirmDelete()"
+/>

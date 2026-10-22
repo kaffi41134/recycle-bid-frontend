@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { FormControlName } from '@angular/forms';
+import { By } from '@angular/platform-browser';
 import { BidImport } from './bid-import';
 import { BidImportDetail, BidNotice } from '../bid.model';
 
@@ -88,14 +90,16 @@ describe('BidImport', () => {
     request.flush(detail);
     fixture.detectChanges();
     expect(component.detailForm.getRawValue()).toEqual(detail);
-    expect(fixture.nativeElement.querySelectorAll('[id^="import-detail-"]').length).toBe(17);
-    expect(
-      (fixture.nativeElement.querySelector('#import-detail-deadline') as HTMLInputElement).value,
-    ).toBe(detail.deadline);
-    expect(
-      (fixture.nativeElement.querySelector('#import-detail-budgetAmount') as HTMLInputElement)
-        .value,
-    ).toBe(detail.budgetAmount);
+    const detailInputs = fixture.debugElement.queryAll(By.css('section input'));
+    expect(detailInputs.length).toBe(17);
+    const deadlineInput = detailInputs.find(
+      (input) => input.injector.get(FormControlName).name === 'deadline',
+    )!.nativeElement as HTMLInputElement;
+    const budgetInput = detailInputs.find(
+      (input) => input.injector.get(FormControlName).name === 'budgetAmount',
+    )!.nativeElement as HTMLInputElement;
+    expect(deadlineInput.value).toBe(detail.deadline);
+    expect(budgetInput.value).toBe(detail.budgetAmount);
     http.expectNone('/api/bids');
   });
 

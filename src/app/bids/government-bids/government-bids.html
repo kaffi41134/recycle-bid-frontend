@@ -2,9 +2,7 @@
   <div>
     <div class="flex flex-wrap items-center gap-3">
       <h1 class="text-[22px] font-bold leading-7 tracking-tight text-slate-900">政府標案</h1>
-      <span class="rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand"
-        >共 {{ bids().length }} 筆案件</span
-      >
+      <span class="count-badge">查詢結果 {{ bids().length }} 筆案件</span>
     </div>
     <p class="mt-1 text-xs leading-5 text-slate-500">
       查詢公告並帶入案件，集中管理機關、公告明細與投標時程。
@@ -13,7 +11,7 @@
   <div class="flex flex-wrap gap-3">
     <button
       type="button"
-      class="button dialog-button button-secondary"
+      class="button button-secondary"
       [disabled]="loading()"
       (click)="bidImport.open()"
     >
@@ -21,7 +19,7 @@
     </button>
     <button
       type="button"
-      class="button dialog-button button-primary"
+      class="button button-primary"
       [disabled]="loading()"
       (click)="openCreate()"
     >
@@ -34,10 +32,9 @@
 @if (notice()) {
   <div
     class="mb-4 flex items-center justify-between gap-3 rounded-lg bg-brand-light px-4 py-3 text-sm text-brand"
-    role="status"
   >
     <p>{{ notice() }}</p>
-    <button type="button" class="text-button gap-2" (click)="notice.set('')">
+    <button type="button" class="button button-text gap-2" (click)="notice.set('')">
       <svg lucideX [size]="16"></svg>關閉提示
     </button>
   </div>
@@ -45,7 +42,6 @@
 
 <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
   <div class="min-w-0 flex-1">
-    <label for="government-keyword" class="sr-only">搜尋政府標案</label>
     <div class="search-box input-control">
       <svg lucideSearch [size]="17"></svg>
       <input
@@ -56,19 +52,41 @@
       />
     </div>
   </div>
-  <button type="button" class="reset-button" (click)="resetSearch()">
+  <div class="flex flex-wrap items-center gap-2 text-[13px] text-slate-600">
+    <label class="flex items-center gap-2">
+      建立日期起
+      <input
+        type="date"
+        class="select-input input-control"
+        formControlName="createdDateFrom"
+        [max]="searchForm.controls.createdDateTo.value"
+      />
+    </label>
+    <label class="flex items-center gap-2">
+      迄
+      <input
+        type="date"
+        class="select-input input-control"
+        formControlName="createdDateTo"
+        [min]="searchForm.controls.createdDateFrom.value"
+      />
+    </label>
+  </div>
+  <button type="button" class="button button-reset" (click)="resetSearch()">
     <svg lucideRotateCw [size]="15"></svg>重設
   </button>
   <span class="text-[13px] text-slate-500"
     >篩選結果：<strong class="text-slate-700">{{ filteredBids().length }}</strong> 筆</span
   >
 </form>
+@if (searchError()) {
+  <p class="mb-4 text-sm text-red-600">{{ searchError() }}，下方保留上次查詢結果。</p>
+}
 
 <section class="table-panel">
   @if (error()) {
     <div
       class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
-      role="alert"
     >
       <p>
         {{ error() }}
@@ -86,17 +104,15 @@
       <thead>
         <tr>
           @for (field of columns; track field.key) {
-            <th scope="col">{{ field.label }}</th>
+            <th>{{ field.label }}</th>
           }
-          <th scope="col" class="table-actions">操作</th>
+          <th class="table-actions">操作</th>
         </tr>
       </thead>
       <tbody>
         @if (loading()) {
           <tr>
-            <td colspan="8" class="!py-14 !text-center text-slate-500" role="status">
-              正在載入政府標案…
-            </td>
+            <td colspan="8" class="!py-14 !text-center text-slate-500">正在載入政府標案…</td>
           </tr>
         } @else {
           @for (item of visibleBids(); track item.id) {
@@ -113,30 +129,27 @@
                 <div class="flex gap-2">
                   <button
                     type="button"
-                    class="action-button"
+                    class="button button-action"
                     [title]="'查看明細 ' + item.jobNumber"
                     (click)="openRecord(item, 'detail')"
                   >
                     <svg lucideFileText [size]="14"></svg>
-                    <span class="sr-only">查看明細 {{ item.jobNumber }}</span>
                   </button>
                   <button
                     type="button"
-                    class="action-button"
+                    class="button button-action"
                     [title]="'編輯 ' + item.jobNumber"
                     (click)="openRecord(item, 'edit')"
                   >
                     <svg lucidePencil [size]="14"></svg>
-                    <span class="sr-only">編輯 {{ item.jobNumber }}</span>
                   </button>
                   <button
                     type="button"
-                    class="action-button action-delete"
+                    class="button button-action button-action-delete"
                     [title]="'刪除 ' + item.jobNumber"
                     (click)="askDelete(item)"
                   >
                     <svg lucideTrash [size]="14"></svg>
-                    <span class="sr-only">刪除 {{ item.jobNumber }}</span>
                   </button>
                 </div>
               </td>
@@ -174,19 +187,19 @@
           mode() === 'create' ? '新增政府標案' : mode() === 'edit' ? '編輯政府標案' : '政府標案明細'
         }}
       </h2>
-      <button type="button" class="text-button gap-2" [disabled]="saving()" (click)="closeEditor()">
+      <button
+        type="button"
+        class="button button-text gap-2"
+        [disabled]="saving()"
+        (click)="closeEditor()"
+      >
         <svg lucideX [size]="16"></svg>關閉
       </button>
     </header>
     <div class="min-h-0 overflow-y-auto p-6">
       @if (loadingDetail()) {
-        <p class="py-10 text-center text-slate-500" role="status">正在取得最新案件資料…</p>
+        <p class="py-10 text-center text-slate-500">正在取得最新案件資料…</p>
       } @else if (mode() === 'create' || selected()) {
-        @if (mode() !== 'detail') {
-          <p class="mb-5 text-xs text-slate-500">
-            <span class="text-red-600">*</span> 為必填；日期、時間與金額可保留公告原文。
-          </p>
-        }
         <fieldset
           class="grid gap-x-5 gap-y-4 sm:grid-cols-2"
           [disabled]="saving() || mode() === 'detail'"
@@ -221,12 +234,12 @@
         }
       }
       @if (formError()) {
-        <div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div class="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
           <p>{{ formError() }}</p>
           @if (!selected() && recordId(); as id) {
             <button
               type="button"
-              class="text-button gap-2"
+              class="button button-text gap-2"
               [disabled]="loadingDetail()"
               (click)="fetchRecord(id)"
             >
@@ -239,24 +252,24 @@
     <footer class="flex shrink-0 justify-end gap-3 border-t border-[#c1d1c9] px-6 py-4">
       <button
         type="button"
-        class="button dialog-button button-secondary"
+        class="button button-secondary"
         [disabled]="saving()"
         (click)="closeEditor()"
       >
-        <svg lucideX [size]="16"></svg>{{ mode() === 'detail' ? '關閉' : '取消' }}
+        @if (mode() === 'detail') {
+          <svg lucideX [size]="16"></svg>關閉
+        } @else {
+          <svg lucideUndo2></svg>取消
+        }
       </button>
       @if (mode() === 'detail' && selected()) {
-        <button
-          type="button"
-          class="button dialog-button button-primary"
-          (click)="mode.set('edit')"
-        >
+        <button type="button" class="button button-primary" (click)="mode.set('edit')">
           <svg lucidePencil [size]="16"></svg>編輯案件
         </button>
       } @else if (mode() !== 'detail') {
         <button
           type="submit"
-          class="button dialog-button button-primary"
+          class="button button-primary"
           [disabled]="
             saving() || loadingDetail() || loading() || (mode() === 'edit' && !selected())
           "
@@ -268,32 +281,18 @@
   </form>
 </dialog>
 
-<dialog #deleteDialog class="form-dialog" (cancel)="closeDelete(); $event.preventDefault()">
-  <div class="p-7">
-    <h2 class="text-xl font-bold">刪除政府標案</h2>
-    <p class="mt-3 leading-6 text-slate-500">
-      確定刪除「{{ pendingDelete()?.jobNumber }}」{{ pendingDelete()?.title }}嗎？刪除後無法復原。
-    </p>
-    @if (deleteError()) {
-      <p class="mt-4 rounded-lg bg-red-50 p-3 text-red-700" role="alert">{{ deleteError() }}</p>
-    }
-    <div class="mt-7 flex justify-end gap-3">
-      <button
-        type="button"
-        class="button dialog-button button-secondary"
-        [disabled]="deleting()"
-        (click)="closeDelete()"
-      >
-        <svg lucideX [size]="16"></svg>取消
-      </button>
-      <button
-        type="button"
-        class="button dialog-button bg-[#d95e5e] text-white hover:bg-[#c34c4c]"
-        [disabled]="deleting() || loading()"
-        (click)="confirmDelete()"
-      >
-        <svg lucideTrash [size]="16"></svg>{{ deleting() ? '刪除中…' : '確認刪除' }}
-      </button>
-    </div>
-  </div>
-</dialog>
+<app-delete-dialog
+  #deleteDialog
+  title="刪除政府標案"
+  [message]="
+    '確定刪除「' +
+    pendingDelete()?.jobNumber +
+    '」' +
+    pendingDelete()?.title +
+    '嗎？刪除後無法復原。'
+  "
+  [deleting]="deleting()"
+  [error]="deleteError()"
+  [confirmDisabled]="loading()"
+  (confirmed)="confirmDelete()"
+/>

@@ -5,10 +5,7 @@
   border-radius: 6px;
 }
 
-.page-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.button-page {
   min-width: 28px;
   height: 28px;
   padding: 0 8px;
@@ -16,25 +13,22 @@
   border-radius: 0;
   background: #fff;
   color: #64748b;
-  transition:
-    background 150ms,
-    color 150ms;
 }
 
-.page-button + .page-button {
+.button-page + .button-page {
   border-left: 1px solid #f1f5f9;
 }
 
-.page-button:hover:not(:disabled) {
+.button-page:hover:not(:disabled) {
   background: #065f46;
   color: #fff;
 }
 
-.page-button:disabled {
+.button-page:disabled {
   opacity: 0.35;
 }
 
-.page-button.page-active {
+.button-page.page-active {
   background: #047857;
   color: #fff;
   font-weight: 600;

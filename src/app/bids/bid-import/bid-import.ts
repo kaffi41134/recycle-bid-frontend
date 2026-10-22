@@ -14,6 +14,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize, Subject, takeUntil } from 'rxjs';
 import {
   LucideSearch,
+  LucideUndo2,
   LucideX,
   LucideRotateCw,
   LucideFileInput,
@@ -33,6 +34,7 @@ import {
   imports: [
     ReactiveFormsModule,
     LucideSearch,
+    LucideUndo2,
     LucideX,
     LucideRotateCw,
     LucideFileInput,

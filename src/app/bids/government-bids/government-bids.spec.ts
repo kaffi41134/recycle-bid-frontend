@@ -142,7 +142,8 @@ describe('GovernmentBids', () => {
     component.bids.set(Array.from({ length: 11 }, (_, i) => ({ ...item, id: i + 1 })));
     component.page.set(2);
     component.askDelete(component.bids()[10]);
-    component.confirmDelete();
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('app-delete-dialog .button-danger').click();
     http
       .expectOne('/api/government-bids/11')
       .flush('刪除失敗', { status: 422, statusText: 'Unprocessable Content' });
@@ -165,5 +166,46 @@ describe('GovernmentBids', () => {
     http.expectOne('/api/government-bids').flush([]);
     expect(component.error()).toBe('');
     expect(component.bids()).toEqual([]);
+  });
+
+  it('queries creation dates, keeps keyword filtering local, and resets dates and pagination', () => {
+    component.page.set(3);
+    component.searchForm.patchValue({ createdDateFrom: '2026-10-01', createdDateTo: '2026-10-22' });
+    const request = http.expectOne(
+      '/api/government-bids?createdDateFrom=2026-10-01&createdDateTo=2026-10-22',
+    );
+    expect(component.page()).toBe(1);
+    request.flush([item]);
+    component.searchForm.controls.keyword.setValue('不存在');
+    http.expectNone((request) => request.url === '/api/government-bids');
+    expect(component.filteredBids()).toEqual([]);
+    component.resetSearch();
+    http.expectOne('/api/government-bids').flush([item]);
+    expect(component.searchForm.getRawValue()).toEqual({
+      keyword: '', createdDateFrom: '', createdDateTo: '',
+    });
+    expect(component.filteredBids()).toEqual([item]);
+  });
+
+  it('supports one-sided dates and cancels an older query when dates change', () => {
+    component.searchForm.controls.createdDateFrom.setValue('2026-10-01');
+    const previous = http.expectOne('/api/government-bids?createdDateFrom=2026-10-01');
+    component.searchForm.patchValue({ createdDateFrom: '', createdDateTo: '2026-10-22' });
+    expect(previous.cancelled).toBe(true);
+    http.expectOne('/api/government-bids?createdDateTo=2026-10-22').flush([item]);
+    expect(component.loading()).toBe(false);
+    expect(component.bids()).toEqual([item]);
+  });
+
+  it('rejects reversed dates without querying and retains the previous results', () => {
+    component.searchForm.patchValue({ createdDateFrom: '2026-10-23', createdDateTo: '2026-10-22' });
+    expect(component.searchError()).toBe('建立日期起日不可晚於迄日');
+    http.expectNone((request) => request.url === '/api/government-bids');
+    expect(component.bids()).toEqual([item]);
+    component.searchForm.controls.createdDateFrom.setValue('2026-10-22');
+    http.expectOne(
+      '/api/government-bids?createdDateFrom=2026-10-22&createdDateTo=2026-10-22',
+    ).flush([]);
+    expect(component.searchError()).toBe('');
   });
 });
