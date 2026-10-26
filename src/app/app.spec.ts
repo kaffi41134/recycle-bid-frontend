@@ -9,7 +9,7 @@ describe('App', () => {
       providers: [
         provideRouter([
           { path: 'materials', title: '回收品項管理', children: [] },
-          { path: 'bids', title: '一般標案', children: [] },
+          { path: 'bids', title: '台塑標案', children: [] },
           { path: 'government-bids', title: '政府標案', children: [] },
         ]),
       ],
@@ -28,6 +28,6 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.nav-active')?.textContent).toContain('回收品項管理');
-    expect(compiled.textContent).toContain('首頁 回收品項管理');
+    expect(compiled.textContent).not.toContain('首頁');
   });
 });

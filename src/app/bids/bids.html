@@ -1,11 +1,18 @@
-<div class="mb-10">
-  <section class="mb-5 flex flex-wrap items-center justify-between gap-4">
+<div class="bid-page mb-10" [class.screenshot-mode]="screenshotMode()">
+  @if (screenshotMode()) {
+    <div class="screenshot-exit">
+      <button type="button" class="button button-secondary" (click)="screenshotMode.set(false)">
+        <svg lucideUndo2 [size]="16"></svg>返回一般模式
+      </button>
+    </div>
+  }
+  <section class="page-header mb-5 flex flex-wrap items-center justify-between gap-4">
     <div>
       <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-[22px] font-bold leading-7 tracking-tight text-slate-900">一般標案</h1>
+        <h1 class="text-[22px] font-bold leading-7 tracking-tight text-slate-900">台塑標案</h1>
         <span class="count-badge">共 {{ bids().length }} 筆案件</span>
       </div>
-      <p class="mt-1 text-xs leading-5 text-slate-500">集中管理標售案件、材料資訊與報價時程。</p>
+      <p class="mt-1 text-xs leading-5 text-slate-500">集中管理標售案件、材料資訊與決標結果。</p>
     </div>
     <div class="flex flex-wrap gap-3">
       <button
@@ -20,29 +27,105 @@
   </section>
 
   <section [attr.aria-busy]="loading()">
-    <form class="filter-bar" [formGroup]="searchForm" (ngSubmit)="search()">
-      <div class="min-w-0 flex-1">
+    <form class="bid-filters" [formGroup]="searchForm" (ngSubmit)="search()">
+      <div class="filter-search-row">
         <div class="search-box input-control">
           <svg lucideSearch [size]="17"></svg>
           <input
-            id="keyword"
             type="search"
             formControlName="keyword"
-            placeholder="搜尋標售案號、材料、聯絡人或提貨地點"
+            placeholder="搜尋標售案號、材料或提貨地點"
           />
         </div>
       </div>
-      <button type="button" class="button button-reset" (click)="resetSearch()">
-        <svg lucideRotateCw [size]="15"></svg>重設
-      </button>
-      <span class="whitespace-nowrap text-[13px] text-[#64748b]"
-        >篩選結果:
-        <strong class="font-bold text-[#334155]">{{ filteredBids().length }}</strong>
-        筆資料</span
-      >
+      <div class="filter-date-row">
+        <span class="date-filter-label">決標日</span>
+        <div class="date-presets">
+          @for (preset of datePresets; track preset.key) {
+            <button
+              type="button"
+              class="button button-date-preset"
+              [class.preset-active]="activePreset() === preset.key"
+              (click)="selectDatePreset(preset.key)"
+            >
+              {{ preset.label }}
+            </button>
+          }
+        </div>
+        <div class="date-range text-[13px] text-slate-600">
+          <input
+            type="date"
+            class="select-input input-control"
+            aria-label="決標日起日"
+            formControlName="awardDateFrom"
+            [max]="searchForm.controls.awardDateTo.value"
+          />
+          <span>至</span>
+          <input
+            type="date"
+            class="select-input input-control"
+            aria-label="決標日迄日"
+            formControlName="awardDateTo"
+            [min]="searchForm.controls.awardDateFrom.value"
+          />
+        </div>
+        <div class="date-filter-actions">
+          <button type="button" class="button button-secondary" (click)="resetSearch()">
+            <svg lucideRotateCw [size]="16"></svg>重設
+          </button>
+          <p class="filter-result">
+            篩選結果：<strong>{{ filteredBids().length }}</strong> 筆
+          </p>
+        </div>
+      </div>
     </form>
+    @if (searchError()) {
+      <p class="mb-4 text-sm text-red-600">{{ searchError() }}</p>
+    }
 
-    <div class="table-panel">
+    <div class="table-panel report-panel">
+      @if (!error()) {
+        <div class="report-summary">
+          <div class="report-heading">
+            <h2>{{ summaryTitle() }}</h2>
+            <p>{{ summaryPeriod() }}</p>
+          </div>
+          <div class="summary-metrics">
+            <div class="summary-metric">
+              <span>決標案件</span><strong>{{ loading() ? '—' : filteredBids().length }} 筆</strong>
+            </div>
+            <div class="summary-metric quantity-metric">
+              <span>總數量</span>
+              @if (loading()) {
+                <strong>—</strong>
+              } @else {
+                @for (total of quantityTotals(); track total.unit) {
+                  <strong
+                    >{{ total.quantity | number: '1.0-6' : 'en-US' }}
+                    <small>{{ total.unit }}</small></strong
+                  >
+                } @empty {
+                  <strong>0</strong>
+                }
+              }
+            </div>
+            <div class="summary-metric">
+              <span>決標總金額</span
+              ><strong>{{ loading() ? '—' : (totalAmount() | number: '1.0-2' : 'en-US') }}</strong>
+            </div>
+          </div>
+          @if (!screenshotMode()) {
+            <button
+              type="button"
+              class="button button-secondary screenshot-button"
+              [disabled]="loading() || !!searchError()"
+              (click)="screenshotMode.set(true)"
+            >
+              <svg lucideCamera [size]="16"></svg>截圖模式
+            </button>
+          }
+        </div>
+      }
       @if (error()) {
         <div
           class="m-3 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-red-50 p-4 text-red-700"
@@ -53,57 +136,88 @@
           </button>
         </div>
       } @else {
-        <div class="overflow-x-auto" aria-label="投標案件列表，可左右捲動" tabindex="0">
-          <table class="data-table table-nowrap w-full min-w-[1800px] text-left">
+        <div class="report-table">
+          <table class="data-table bid-table">
+            <colgroup>
+              <col style="width: 13%" />
+              <col style="width: 11%" />
+              <col />
+              <col style="width: 10%" />
+              <col style="width: 6%" />
+              <col style="width: 11%" />
+              <col style="width: 15%" />
+              <col style="width: 9%" />
+              @if (!screenshotMode()) {
+                <col style="width: 88px" />
+              }
+            </colgroup>
             <thead>
               <tr>
                 @for (field of fields; track field.key) {
-                  <th>{{ field.label }}</th>
+                  <th [class.text-right]="field.key === 'quantity' || field.key === 'awardAmount'">
+                    {{ field.label }}
+                  </th>
                 }
-                <th class="table-actions">操作</th>
+                @if (!screenshotMode()) {
+                  <th class="table-actions">操作</th>
+                }
               </tr>
             </thead>
             <tbody>
               @if (loading()) {
                 <tr>
-                  <td colspan="13" class="!py-14 text-center text-slate-500">正在載入案件資料…</td>
+                  <td
+                    [attr.colspan]="screenshotMode() ? 8 : 9"
+                    class="!py-14 text-center text-slate-500"
+                  >
+                    正在載入案件資料…
+                  </td>
                 </tr>
               } @else {
                 @for (item of visibleBids(); track item.id) {
                   <tr>
                     @for (field of fields; track field.key) {
                       <td
+                        [class.text-right]="field.key === 'quantity' || field.key === 'awardAmount'"
                         [class.table-code]="field.key === 'bidNo'"
                         [class.table-description]="field.key === 'itemDescription'"
                       >
-                        {{ item[field.key] ?? '—' }}
+                        @if (field.key === 'quantity') {
+                          {{ (item.quantity | number: '1.0-6' : 'en-US') ?? '—' }}
+                        } @else if (field.key === 'awardAmount') {
+                          {{ (item.awardAmount | number: '1.0-2' : 'en-US') ?? '—' }}
+                        } @else {
+                          {{ item[field.key] ?? '—' }}
+                        }
                       </td>
                     }
-                    <td class="table-actions">
-                      <div class="flex gap-2">
-                        <button
-                          type="button"
-                          class="button button-action"
-                          [attr.title]="'編輯' + item.bidNo"
-                          [attr.aria-label]="'編輯' + item.bidNo"
-                          (click)="openEdit(item)"
-                        >
-                          <svg lucidePencil [size]="14"></svg></button
-                        ><button
-                          type="button"
-                          class="button button-action button-action-delete"
-                          [attr.title]="'刪除' + item.bidNo"
-                          [attr.aria-label]="'刪除' + item.bidNo"
-                          (click)="askDelete(item)"
-                        >
-                          <svg lucideTrash [size]="14"></svg>
-                        </button>
-                      </div>
-                    </td>
+                    @if (!screenshotMode()) {
+                      <td class="table-actions">
+                        <div class="flex gap-1">
+                          <button
+                            type="button"
+                            class="button button-action"
+                            [attr.title]="'編輯' + item.bidNo"
+                            [attr.aria-label]="'編輯' + item.bidNo"
+                            (click)="openEdit(item)"
+                          >
+                            編輯</button
+                          ><button
+                            type="button"
+                            class="button button-action button-action-delete"
+                            [attr.title]="'刪除' + item.bidNo"
+                            [attr.aria-label]="'刪除' + item.bidNo"
+                            (click)="askDelete(item)"
+                          >
+                            刪除
+                          </button>
+                        </div>
+                      </td>
+                    }
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="13" class="!py-14 !text-center">
+                    <td [attr.colspan]="screenshotMode() ? 8 : 9" class="!py-14 !text-center">
                       <p class="mt-3 font-medium">沒有符合條件的案件</p>
                       <p class="mt-1 text-sm text-[#73867c]">
                         請調整查詢條件，或新增第一筆投標案件。
@@ -115,11 +229,13 @@
             </tbody>
           </table>
         </div>
-        <app-pagination
-          [(page)]="page"
-          [(pageSize)]="pageSize"
-          [totalItems]="filteredBids().length"
-        />
+        @if (!screenshotMode()) {
+          <app-pagination
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [totalItems]="filteredBids().length"
+          />
+        }
       }
     </div>
   </section>
@@ -152,10 +268,7 @@
             <span class="category-dot" data-group="material" aria-hidden="true"></span>材料資訊
           </li>
           <li class="flex items-center gap-[5px]">
-            <span class="category-dot" data-group="quotation" aria-hidden="true"></span>報價日期
-          </li>
-          <li class="flex items-center gap-[5px]">
-            <span class="category-dot" data-group="other" aria-hidden="true"></span>其他
+            <span class="category-dot" data-group="award" aria-hidden="true"></span>決標資訊
           </li>
         </ul>
       </div>
@@ -165,12 +278,7 @@
           [disabled]="saving()"
         >
           @for (field of fields; track field.key) {
-            <div
-              class="min-w-0"
-              [class.col-span-full]="
-                field.key === 'itemDescription' || field.key === 'referenceStorageLocation'
-              "
-            >
+            <div class="min-w-0" [class.col-span-full]="field.key === 'itemDescription'">
               <label
                 [for]="'bid-' + field.key"
                 class="field-label mb-1.5 flex items-center gap-1.5 text-[13px] leading-[18px]"
@@ -185,14 +293,15 @@
                   <span class="text-red-600">*</span>
                 }
               </label>
-              @if (field.key === 'quantity') {
+              @if (field.type === 'number') {
                 <input
-                  id="bid-quantity"
+                  [id]="'bid-' + field.key"
                   class="field input-control"
                   type="number"
-                  step="any"
+                  [step]="field.key === 'awardAmount' ? '0.01' : '0.000001'"
+                  min="0"
                   [placeholder]="field.placeholder"
-                  formControlName="quantity"
+                  [formControlName]="field.key"
                 />
               } @else {
                 <input
@@ -203,17 +312,29 @@
                   [formControlName]="field.key"
                   [attr.required]="field.key === 'bidNo' ? '' : null"
                   [attr.aria-invalid]="
-                    (bidForm.controls[field.key].touched && bidForm.controls[field.key].invalid) ||
-                    (field.key === 'quotationDeadlineDate' && bidForm.hasError('dateRange'))
-                  "
-                  [attr.aria-describedby]="
-                    field.key === 'bidNo'
-                      ? 'bid-no-error'
-                      : field.key === 'quotationDeadlineDate'
-                        ? 'date-error'
-                        : null
+                    bidForm.controls[field.key].touched && bidForm.controls[field.key].invalid
                   "
                 />
+              }
+              @if (
+                field.key === 'quantity' &&
+                bidForm.controls.quantity.touched &&
+                bidForm.controls.quantity.invalid
+              ) {
+                <p class="mt-1 text-xs text-red-600">
+                  {{
+                    bidForm.controls.quantity.hasError('min')
+                      ? '數量不得小於零。'
+                      : '數量最多 13 位整數及 6 位小數。'
+                  }}
+                </p>
+              }
+              @if (
+                field.key === 'awardAmount' &&
+                bidForm.controls.awardAmount.touched &&
+                bidForm.controls.awardAmount.invalid
+              ) {
+                <p class="mt-1 text-xs text-red-600">決標金額請填零以上、最多兩位小數的數字。</p>
               }
               @if (
                 field.key === 'bidNo' &&

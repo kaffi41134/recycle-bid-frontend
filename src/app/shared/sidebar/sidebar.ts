@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import {
   LucideBarcode,
@@ -29,13 +29,11 @@ interface NavItem {
 })
 export class Sidebar {
   readonly brandIcon = LucideLeaf;
-  readonly open = model(false);
-  readonly isExpanded = model(true);
   readonly highlight = signal({ top: 0, height: 0 });
   readonly navItems: NavItem[] = [
     { label: 'Dashboard', icon: LucideLayoutDashboard },
     { label: '回收品項管理', icon: LucideRecycle, route: '/materials' },
-    { label: '一般標案', icon: LucideGavel, route: '/bids' },
+    { label: '台塑標案', icon: LucideGavel, route: '/bids' },
     { label: '政府標案', icon: LucideGavel, route: '/government-bids' },
     { label: '回收紀錄', icon: LucideClipboardList },
     { label: 'Barcode', icon: LucideBarcode },

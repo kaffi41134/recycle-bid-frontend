@@ -34,7 +34,7 @@ describe('Bid routes', () => {
     http.expectOne('/api/bids').flush([]);
     http.expectNone('/api/government-bids');
     harness.detectChanges();
-    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('一般標案');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toContain('台塑標案');
     expect(harness.routeNativeElement?.querySelectorAll('table').length).toBe(1);
   }, 120_000);
 

@@ -7,6 +7,8 @@ export interface BidRequest {
   itemDescription: string | null;
   quantity: number | null;
   unit: string | null;
+  awardAmount: number | null;
+  awardDate: string | null;
   pickupLocation: string | null;
   quotationNoticeDate: string | null;
   quotationDeadlineDate: string | null;

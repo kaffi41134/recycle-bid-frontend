@@ -25,7 +25,7 @@
 .category-dot[data-group='material'] {
   background: #bc7200;
 }
-.category-dot[data-group='quotation'] {
+.category-dot[data-group='award'] {
   background: #2463b4;
 }
 .category-dot[data-group='other'] {
@@ -42,5 +42,223 @@
     scrollbar-gutter: stable;
     padding-right: 20px;
     padding-left: 20px;
+  }
+}
+
+/* 固定欄位比例，長案號、規格和日期皆可換行。 */
+.bid-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+.bid-table th,
+.bid-table td {
+  padding: 10px 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: top;
+  line-height: 1.6;
+}
+.bid-table td.table-description {
+  min-width: 0;
+  max-width: none;
+}
+.bid-table th:not(:last-child),
+.bid-table td:not(:last-child) {
+  border-right: 1px solid #e2e8f0;
+}
+.bid-table .table-actions {
+  position: static;
+  padding-right: 6px;
+  padding-left: 6px;
+}
+.bid-table .button-action {
+  padding: 5px;
+  min-width: 0;
+  min-height: 0;
+}
+@media (min-width: 1200px) {
+  .bid-table th,
+  .bid-table td {
+    padding: 12px 10px;
+  }
+}
+
+.bid-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #fff;
+}
+.filter-search-row {
+  flex: 1 1 0;
+  min-width: 80px;
+}
+.filter-search-row .search-box {
+  min-width: 0;
+  height: 36px;
+  padding: 0 8px;
+}
+.filter-search-row .search-box input {
+  min-width: 0;
+  font-size: 12px;
+}
+.filter-date-row {
+  display: contents;
+}
+.date-presets,
+.date-range {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.date-filter-label {
+  display: none;
+}
+.date-range {
+  gap: 8px;
+}
+.button-date-preset {
+  height: 34px;
+  padding: 0 6px;
+  border: 1px solid #dce3df;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+}
+.button-date-preset:hover {
+  background: #f3f8f5;
+}
+.button-date-preset.preset-active {
+  border-color: #aad1b8;
+  background: #eaf5ee;
+  color: #17613d;
+}
+.date-range .input-control {
+  width: 108px;
+  min-width: 0;
+  padding: 0 4px;
+}
+.date-filter-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  margin-left: 0;
+}
+.date-filter-actions .button-secondary {
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+.filter-result {
+  white-space: nowrap;
+  text-align: right;
+  font-size: 12px;
+  color: #64748b;
+}
+.report-panel {
+  padding: 20px;
+  border-radius: 16px;
+}
+.report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.report-heading {
+  flex: 1 0 130px;
+}
+.report-heading h2 {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: #1e293b;
+}
+.report-heading p {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+.summary-metrics {
+  display: flex;
+  flex: 2 1 310px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.summary-metric {
+  display: flex;
+  flex: 1 0 90px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8faf9;
+}
+.summary-metric > span {
+  font-size: 12px;
+  color: #64748b;
+}
+.summary-metric strong {
+  overflow-wrap: anywhere;
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 700;
+  color: #1e293b;
+}
+.summary-metric small {
+  font-size: 14px;
+}
+.quantity-metric {
+  flex-basis: 130px;
+}
+.screenshot-button {
+  height: 36px;
+  font-size: 12px;
+}
+.report-table {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.screenshot-exit {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+.screenshot-mode .page-header,
+.screenshot-mode .bid-filters {
+  display: none;
+}
+.screenshot-mode .report-panel {
+  border-color: #d5ddd8;
+}
+@media (max-width: 1023px) {
+  .report-panel {
+    padding: 16px;
+  }
+  .report-summary {
+    gap: 12px;
+  }
+}
+@media (min-width: 1200px) {
+  .date-filter-label {
+    display: inline;
+    color: #64748b;
+    font-size: 12px;
+    white-space: nowrap;
   }
 }

@@ -257,10 +257,10 @@ button:disabled {
     @apply h-8 rounded-[7px] border border-[#e2e8f0] bg-[#f8fafc] px-3 text-[13px] text-[#475569] hover:bg-[#f1f5f9];
   }
   .button-action {
-    @apply h-7 w-[26px] rounded-[5px] text-[#94a3b8] hover:bg-[#e3f3e9] hover:text-[#197e50];
+    @apply h-7 w-auto shrink-0 whitespace-nowrap rounded-[5px] bg-[#edf7f0] px-2 text-xs text-[#397052] hover:bg-[#e3f3e9] hover:text-[#197e50];
   }
-  .button-action-delete:hover {
-    @apply bg-[#fef2f2] text-[#c34c4c];
+  .button-action-delete {
+    @apply bg-[#fff1f0] text-[#b45e5e] hover:bg-[#fee7e5] hover:text-[#c34c4c];
   }
   .button-overlay {
     @apply fixed inset-0 z-30 bg-black/30;
@@ -270,5 +270,18 @@ button:disabled {
   }
   .count-badge {
     @apply rounded-full bg-brand-light px-3 py-1 text-[11px] text-brand;
+  }
+}
+
+/* 截圖模式由台塑標案元件的狀態控制，離開頁面時會自動還原。 */
+body:has(.bid-page.screenshot-mode) app-sidebar {
+  display: none;
+}
+body:has(.bid-page.screenshot-mode) .app-content {
+  margin-left: 0;
+}
+@media print {
+  .screenshot-exit {
+    display: none;
   }
 }

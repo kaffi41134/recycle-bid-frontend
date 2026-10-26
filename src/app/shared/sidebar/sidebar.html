@@ -1,17 +1,5 @@
-@if (open()) {
-  <button
-    type="button"
-    class="button button-overlay lg:hidden"
-    (click)="open.set(false)"
-  ></button>
-}
-<aside
-  class="sidebar"
-  [class.sidebar-open]="open()"
-  [class.sidebar-collapsed]="!isExpanded()"
-  (keydown.escape)="open.set(false)"
->
-  <a routerLink="/materials" class="brand" (click)="open.set(false)">
+<aside class="sidebar">
+  <a routerLink="/materials" class="brand">
     <span class="brand-icon">
       <svg [lucideIcon]="brandIcon" [size]="20"></svg>
     </span>
@@ -35,8 +23,6 @@
             routerLinkActive="nav-active"
             ariaCurrentWhenActive="page"
             class="button button-nav gap-3"
-            [title]="!isExpanded() ? item.label : null"
-            (click)="open.set(false)"
           >
             <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
             <span class="nav-label collapsible-content">{{ item.label }}</span>
@@ -46,7 +32,7 @@
             type="button"
             class="button button-nav w-full gap-3 text-left"
             disabled
-            [title]="isExpanded() ? '此功能尚未建置' : item.label + '（此功能尚未建置）'"
+            title="此功能尚未建置"
           >
             <svg [lucideIcon]="item.icon" [size]="20" class="shrink-0"></svg>
             <span class="nav-label collapsible-content">{{ item.label }}</span>

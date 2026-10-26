@@ -10,7 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -20,29 +20,30 @@ import { BidService } from './bid.service';
 import { DeleteDialog } from '../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../shared/pagination/pagination';
 import {
+  LucideCamera,
   LucideFileCheck,
-  LucidePencil,
   LucidePlus,
   LucideRotateCw,
   LucideSearch,
-  LucideTrash,
   LucideUndo2,
   LucideX,
 } from '@lucide/angular';
+
+type DatePreset = 'all' | 'today' | 'yesterday' | 'week' | 'month' | 'custom';
 
 @Component({
   selector: 'app-bids',
   imports: [
     ReactiveFormsModule,
     DatePipe,
+    DecimalPipe,
     Pagination,
     DeleteDialog,
+    LucideCamera,
     LucideFileCheck,
-    LucidePencil,
     LucidePlus,
     LucideRotateCw,
     LucideSearch,
-    LucideTrash,
     LucideUndo2,
     LucideX,
   ],
@@ -70,7 +71,16 @@ export class Bids implements OnInit {
   readonly page = signal(1);
   readonly pageSize = signal(10);
 
-  readonly searchForm = this.fb.group({ keyword: '' });
+  readonly screenshotMode = signal(false);
+  readonly activePreset = signal<DatePreset>('all');
+  readonly datePresets = [
+    { key: 'all', label: '全部' },
+    { key: 'today', label: '今天' },
+    { key: 'yesterday', label: '昨天' },
+    { key: 'week', label: '本週' },
+    { key: 'month', label: '本月' },
+  ] as const;
+  readonly searchForm = this.fb.group({ keyword: '', awardDateFrom: '', awardDateTo: '' });
   readonly filters = signal(this.searchForm.getRawValue());
   readonly fields = [
     {
@@ -80,47 +90,13 @@ export class Bids implements OnInit {
       group: 'basic',
       placeholder: '請輸入標售案號',
     },
-    { key: 'contactName', label: '聯絡人', type: 'text', group: 'basic', placeholder: '姓名' },
-    {
-      key: 'contactPhone',
-      label: '電話',
-      type: 'tel',
-      group: 'basic',
-      placeholder: '例：02-1234-5678',
-    },
     { key: 'materialCode', label: '材料編號', type: 'text', group: 'material', placeholder: '' },
     { key: 'itemDescription', label: '品名規格', type: 'text', group: 'material', placeholder: '' },
     { key: 'quantity', label: '數量', type: 'number', group: 'material', placeholder: '0' },
     { key: 'unit', label: '單位', type: 'text', group: 'material', placeholder: '例：公斤、個' },
+    { key: 'awardAmount', label: '決標金額', type: 'number', group: 'award', placeholder: '0.00' },
     { key: 'pickupLocation', label: '提貨地點', type: 'text', group: 'material', placeholder: '' },
-    {
-      key: 'quotationNoticeDate',
-      label: '報價通知日',
-      type: 'date',
-      group: 'quotation',
-      placeholder: '',
-    },
-    {
-      key: 'quotationDeadlineDate',
-      label: '報價截止日',
-      type: 'date',
-      group: 'quotation',
-      placeholder: '',
-    },
-    {
-      key: 'environmentalCode',
-      label: '環保法定代碼',
-      type: 'text',
-      group: 'other',
-      placeholder: '',
-    },
-    {
-      key: 'referenceStorageLocation',
-      label: '參考料位',
-      type: 'text',
-      group: 'other',
-      placeholder: '',
-    },
+    { key: 'awardDate', label: '決標日', type: 'date', group: 'award', placeholder: '' },
   ] as const;
   readonly bidForm = this.fb.group(
     {
@@ -129,8 +105,16 @@ export class Bids implements OnInit {
       contactPhone: '',
       materialCode: '',
       itemDescription: '',
-      quantity: this.fb.control<number | null>(null),
+      quantity: this.fb.control<number | null>(null, [
+        Validators.min(0),
+        quantityPrecisionValidator,
+      ]),
       unit: '',
+      awardAmount: this.fb.control<number | null>(null, [
+        Validators.min(0),
+        Validators.pattern(/^\d+(\.\d{1,2})?$/),
+      ]),
+      awardDate: '',
       pickupLocation: '',
       quotationNoticeDate: '',
       quotationDeadlineDate: '',
@@ -140,23 +124,78 @@ export class Bids implements OnInit {
     { validators: dateRangeValidator },
   );
 
+  readonly searchError = computed(() => {
+    const { awardDateFrom, awardDateTo } = this.filters();
+    return awardDateFrom && awardDateTo && awardDateFrom > awardDateTo
+      ? '決標日期起日不可晚於迄日'
+      : '';
+  });
   readonly filteredBids = computed(() => {
-    const query = this.filters().keyword.trim().toLowerCase();
-    return this.bids().filter(
-      (item) =>
-        !query ||
-        this.fields.some(({ key }) =>
-          String(item[key] ?? '')
-            .toLowerCase()
-            .includes(query),
-        ),
-    );
+    const { keyword, awardDateFrom, awardDateTo } = this.filters();
+    const query = keyword.trim().toLowerCase();
+    if (this.searchError()) return [];
+    return this.bids()
+      .filter((item) => {
+        const matchesKeyword =
+          !query ||
+          this.fields.some(({ key }) =>
+            String(item[key] ?? '')
+              .toLowerCase()
+              .includes(query),
+          );
+        const awardDate = item.awardDate;
+        const matchesDate =
+          (!awardDateFrom || (!!awardDate && awardDate >= awardDateFrom)) &&
+          (!awardDateTo || (!!awardDate && awardDate <= awardDateTo));
+        return matchesKeyword && matchesDate;
+      })
+      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
+  });
+  readonly summaryTitle = computed(
+    () =>
+      ({
+        all: '全部決標彙總',
+        today: '今日決標彙總',
+        yesterday: '昨日決標彙總',
+        week: '本週決標彙總',
+        month: '本月決標彙總',
+        custom: '決標彙總',
+      })[this.activePreset()],
+  );
+  readonly summaryPeriod = computed(() => {
+    const { awardDateFrom, awardDateTo } = this.filters();
+    if (!awardDateFrom && !awardDateTo) return '全部日期';
+    const from = awardDateFrom.replaceAll('-', '/');
+    const to = awardDateTo.replaceAll('-', '/');
+    if (awardDateFrom && awardDateFrom === awardDateTo) {
+      const weekday = new Intl.DateTimeFormat('zh-TW', {
+        weekday: 'short',
+        timeZone: 'UTC',
+      }).format(new Date(`${awardDateFrom}T12:00:00Z`));
+      return `${from}（${weekday}）`;
+    }
+    return `${from || '不限起日'} 至 ${to || '不限迄日'}`;
+  });
+  readonly totalAmount = computed(
+    () =>
+      this.filteredBids().reduce((sum, bid) => sum + Math.round((bid.awardAmount ?? 0) * 100), 0) /
+      100,
+  );
+  readonly quantityTotals = computed(() => {
+    const totals = new Map<string, number>();
+    for (const bid of this.filteredBids()) {
+      if (bid.quantity === null) continue;
+      const unit = bid.unit?.trim().toUpperCase() || '未填單位';
+      totals.set(unit, (totals.get(unit) ?? 0) + bid.quantity);
+    }
+    return Array.from(totals, ([unit, quantity]) => ({ unit, quantity }));
   });
   readonly pageCount = computed(() =>
     Math.max(1, Math.ceil(this.filteredBids().length / this.pageSize())),
   );
   readonly currentPage = computed(() => Math.min(this.page(), this.pageCount()));
   readonly visibleBids = computed(() => {
+    if (this.screenshotMode()) return this.filteredBids();
     const start = (this.currentPage() - 1) * this.pageSize();
     return this.filteredBids().slice(start, start + this.pageSize());
   });
@@ -188,13 +227,28 @@ export class Bids implements OnInit {
   }
 
   search() {
-    this.filters.set(this.searchForm.getRawValue());
+    const value = this.searchForm.getRawValue();
+    const previous = this.filters();
+    if (
+      value.awardDateFrom !== previous.awardDateFrom ||
+      value.awardDateTo !== previous.awardDateTo
+    ) {
+      this.activePreset.set(value.awardDateFrom || value.awardDateTo ? 'custom' : 'all');
+    }
+    this.filters.set(value);
     this.page.set(1);
+  }
+
+  selectDatePreset(preset: Exclude<DatePreset, 'custom'>) {
+    const { from, to } = awardDateRange(preset);
+    this.searchForm.patchValue({ awardDateFrom: from, awardDateTo: to });
+    this.activePreset.set(preset);
   }
 
   resetSearch() {
     this.searchForm.reset();
     this.search();
+    this.activePreset.set('all');
   }
 
   openCreate() {
@@ -216,6 +270,8 @@ export class Bids implements OnInit {
       itemDescription: item.itemDescription ?? '',
       unit: item.unit ?? '',
       pickupLocation: item.pickupLocation ?? '',
+      awardAmount: item.awardAmount ?? null,
+      awardDate: item.awardDate ?? '',
       quotationNoticeDate: item.quotationNoticeDate ?? '',
       quotationDeadlineDate: item.quotationDeadlineDate ?? '',
       environmentalCode: item.environmentalCode ?? '',
@@ -242,6 +298,7 @@ export class Bids implements OnInit {
       itemDescription: value.itemDescription.trim() || null,
       unit: value.unit.trim() || null,
       pickupLocation: value.pickupLocation.trim() || null,
+      awardDate: value.awardDate.trim() || null,
       quotationNoticeDate: value.quotationNoticeDate.trim() || null,
       quotationDeadlineDate: value.quotationDeadlineDate.trim() || null,
       environmentalCode: value.environmentalCode.trim() || null,
@@ -312,4 +369,41 @@ export function dateRangeValidator(control: AbstractControl) {
   const notice = control.get('quotationNoticeDate')?.value;
   const deadline = control.get('quotationDeadlineDate')?.value;
   return notice && deadline && deadline < notice ? { dateRange: true } : null;
+}
+
+// number input 會把小數轉成 number；同時處理 0.000001 轉為科學記號的情形。
+export function quantityPrecisionValidator(control: AbstractControl) {
+  const value = control.value;
+  if (value === null || value === '') return null;
+  const [coefficient, exponent = '0'] = String(value).toLowerCase().split('e');
+  const decimalPlaces = (coefficient.split('.')[1]?.length ?? 0) - Number(exponent);
+  return !Number.isFinite(value) || Math.abs(value) >= 1e13 || decimalPlaces > 6
+    ? { quantityPrecision: true }
+    : null;
+}
+
+// 以台灣日期計算快捷區間；本週從星期一開始，區間包含完整的一週／月份。
+export function awardDateRange(preset: Exclude<DatePreset, 'custom'>, now = new Date()) {
+  if (preset === 'all') return { from: '', to: '' };
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const part = (type: string) => parts.find((p) => p.type === type)!.value;
+  const start = new Date(`${part('year')}-${part('month')}-${part('day')}T12:00:00Z`);
+  const end = new Date(start);
+  if (preset === 'yesterday') {
+    start.setUTCDate(start.getUTCDate() - 1);
+    end.setTime(start.getTime());
+  } else if (preset === 'week') {
+    start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
+    end.setTime(start.getTime());
+    end.setUTCDate(end.getUTCDate() + 6);
+  } else if (preset === 'month') {
+    start.setUTCDate(1);
+    end.setUTCMonth(end.getUTCMonth() + 1, 0);
+  }
+  return { from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) };
 }

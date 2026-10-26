@@ -21,11 +21,9 @@ import { DeleteDialog } from '../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../shared/pagination/pagination';
 import {
   LucideFileCheck,
-  LucidePencil,
   LucidePlus,
   LucideRotateCw,
   LucideSearch,
-  LucideTrash,
   LucideUndo2,
   LucideX,
 } from '@lucide/angular';
@@ -38,11 +36,9 @@ import {
     Pagination,
     DeleteDialog,
     LucideFileCheck,
-    LucidePencil,
     LucidePlus,
     LucideRotateCw,
     LucideSearch,
-    LucideTrash,
     LucideUndo2,
     LucideX,
   ],

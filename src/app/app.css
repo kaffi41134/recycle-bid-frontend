@@ -1,19 +1,11 @@
-.app-content {
-  transition: margin-left 180ms ease;
-}
-
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .app-content {
-    margin-left: 230px;
-  }
-
-  .app-content.sidebar-collapsed {
-    margin-left: 72px;
+    margin-left: 180px;
+    min-width: 0;
   }
 }
-
-@media (prefers-reduced-motion: reduce) {
+@media (min-width: 1200px) {
   .app-content {
-    transition: none;
+    margin-left: 210px;
   }
 }
