@@ -92,10 +92,15 @@
           </div>
           <div class="summary-metrics">
             <div class="summary-metric">
-              <span>決標案件</span><strong>{{ loading() ? '—' : filteredBids().length }} 筆</strong>
+              <span class="flex items-center gap-1.5">
+                <svg lucideFileCheck [size]="15" class="shrink-0 text-primary"></svg>決標案件
+              </span>
+              <strong>{{ loading() ? '—' : filteredBids().length }} 筆</strong>
             </div>
             <div class="summary-metric quantity-metric">
-              <span>總數量</span>
+              <span class="flex items-center gap-1.5">
+                <svg lucideBoxes [size]="15" class="shrink-0 text-primary"></svg>總數量
+              </span>
               @if (loading()) {
                 <strong>—</strong>
               } @else {
@@ -110,8 +115,10 @@
               }
             </div>
             <div class="summary-metric">
-              <span>決標總金額</span
-              ><strong>{{ loading() ? '—' : (totalAmount() | number: '1.0-2' : 'en-US') }}</strong>
+              <span class="flex items-center gap-1.5">
+                <svg lucideBanknote [size]="15" class="shrink-0 text-primary"></svg>決標總金額
+              </span>
+              <strong>{{ loading() ? '—' : (totalAmount() | number: '1.0-2' : 'en-US') }}</strong>
             </div>
           </div>
           @if (!screenshotMode()) {

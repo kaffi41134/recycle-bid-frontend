@@ -20,6 +20,8 @@ import { BidService } from './bid.service';
 import { DeleteDialog } from '../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../shared/pagination/pagination';
 import {
+  LucideBanknote,
+  LucideBoxes,
   LucideCamera,
   LucideFileCheck,
   LucidePlus,
@@ -39,6 +41,8 @@ type DatePreset = 'all' | 'today' | 'yesterday' | 'week' | 'month' | 'custom';
     DecimalPipe,
     Pagination,
     DeleteDialog,
+    LucideBanknote,
+    LucideBoxes,
     LucideCamera,
     LucideFileCheck,
     LucidePlus,
