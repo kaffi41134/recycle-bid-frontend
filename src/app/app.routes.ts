@@ -4,13 +4,13 @@ export const routes: Routes = [
   {
     path: 'bids',
     title: '台塑標案',
-    loadComponent: () => import('./bids/bids').then((m) => m.Bids),
+    loadComponent: () => import('./bids/formosa/bids').then((m) => m.Bids),
   },
   {
     path: 'government-bids',
     title: '政府標案',
     loadComponent: () =>
-      import('./bids/government-bids/government-bids').then((m) => m.GovernmentBids),
+      import('./bids/government/government-bids').then((m) => m.GovernmentBids),
   },
   {
     path: 'materials',

@@ -26,7 +26,7 @@ import {
 import { GovernmentBid, governmentBidFields } from './government-bid.model';
 import { GovernmentBidService } from './government-bid.service';
 import { createGovernmentBidForm, toGovernmentBidRequest } from './government-bid.form';
-import { BidImport } from '../bid-import/bid-import';
+import { BidImport } from './bid-import';
 import { DeleteDialog } from '../../shared/delete-dialog/delete-dialog';
 import { Pagination } from '../../shared/pagination/pagination';
 
@@ -47,7 +47,6 @@ import { Pagination } from '../../shared/pagination/pagination';
     LucideRotateCw,
   ],
   templateUrl: './government-bids.html',
-  styleUrl: '../bids.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GovernmentBids implements OnInit {

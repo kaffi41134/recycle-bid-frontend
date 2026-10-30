@@ -14,15 +14,16 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 import { Bid, BidRequest } from './bid.model';
 import { BidService } from './bid.service';
-import { DeleteDialog } from '../shared/delete-dialog/delete-dialog';
-import { Pagination } from '../shared/pagination/pagination';
+import { DeleteDialog } from '../../shared/delete-dialog/delete-dialog';
+import { Pagination } from '../../shared/pagination/pagination';
 import {
   LucideBanknote,
   LucideBoxes,
   LucideCamera,
+  LucideDownload,
   LucideFileCheck,
   LucidePlus,
   LucideRotateCw,
@@ -31,7 +32,12 @@ import {
   LucideX,
 } from '@lucide/angular';
 
-type DatePreset = 'all' | 'today' | 'yesterday' | 'week' | 'month' | 'custom';
+import {
+  DateRangeFilter,
+  DatePreset,
+  DateRangeSelection,
+  datePresetRange,
+} from '../../shared/date-range-filter/date-range-filter';
 
 @Component({
   selector: 'app-bids',
@@ -40,10 +46,12 @@ type DatePreset = 'all' | 'today' | 'yesterday' | 'week' | 'month' | 'custom';
     DatePipe,
     DecimalPipe,
     Pagination,
+    DateRangeFilter,
     DeleteDialog,
     LucideBanknote,
     LucideBoxes,
     LucideCamera,
+    LucideDownload,
     LucideFileCheck,
     LucidePlus,
     LucideRotateCw,
@@ -62,11 +70,14 @@ export class Bids implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly editor = viewChild.required<ElementRef<HTMLDialogElement>>('editor');
   private readonly deleteDialog = viewChild.required(DeleteDialog);
+  private listRequest?: Subscription;
 
   readonly bids = signal<Bid[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly deleting = signal(false);
+  readonly exporting = signal(false);
+  readonly exportError = signal('');
   readonly error = signal('');
   readonly formError = signal('');
   readonly deleteError = signal('');
@@ -77,13 +88,7 @@ export class Bids implements OnInit {
 
   readonly screenshotMode = signal(false);
   readonly activePreset = signal<DatePreset>('all');
-  readonly datePresets = [
-    { key: 'all', label: '全部' },
-    { key: 'today', label: '今天' },
-    { key: 'yesterday', label: '昨天' },
-    { key: 'week', label: '本週' },
-    { key: 'month', label: '本月' },
-  ] as const;
+  readonly appliedPreset = signal<DatePreset>('all');
   readonly searchForm = this.fb.group({ keyword: '', awardDateFrom: '', awardDateTo: '' });
   readonly filters = signal(this.searchForm.getRawValue());
   readonly fields = [
@@ -128,33 +133,9 @@ export class Bids implements OnInit {
     { validators: dateRangeValidator },
   );
 
-  readonly searchError = computed(() => {
-    const { awardDateFrom, awardDateTo } = this.filters();
-    return awardDateFrom && awardDateTo && awardDateFrom > awardDateTo
-      ? '決標日期起日不可晚於迄日'
-      : '';
-  });
-  readonly filteredBids = computed(() => {
-    const { keyword, awardDateFrom, awardDateTo } = this.filters();
-    const query = keyword.trim().toLowerCase();
-    if (this.searchError()) return [];
-    return this.bids()
-      .filter((item) => {
-        const matchesKeyword =
-          !query ||
-          this.fields.some(({ key }) =>
-            String(item[key] ?? '')
-              .toLowerCase()
-              .includes(query),
-          );
-        const awardDate = item.awardDate;
-        const matchesDate =
-          (!awardDateFrom || (!!awardDate && awardDate >= awardDateFrom)) &&
-          (!awardDateTo || (!!awardDate && awardDate <= awardDateTo));
-        return matchesKeyword && matchesDate;
-      })
-      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''));
-  });
+  readonly searchError = signal('');
+  // 篩選與排序由後端處理，保留名稱供表格、統計與分頁使用。
+  readonly filteredBids = computed(() => this.bids());
   readonly summaryTitle = computed(
     () =>
       ({
@@ -164,7 +145,7 @@ export class Bids implements OnInit {
         week: '本週決標彙總',
         month: '本月決標彙總',
         custom: '決標彙總',
-      })[this.activePreset()],
+      })[this.appliedPreset()],
   );
   readonly summaryPeriod = computed(() => {
     const { awardDateFrom, awardDateTo } = this.filters();
@@ -205,21 +186,20 @@ export class Bids implements OnInit {
   });
 
   ngOnInit() {
-    this.searchForm.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.search());
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      this.searchForm.controls.keyword.setValue(params.get('keyword') ?? '');
+      this.searchForm.controls.keyword.setValue(params.get('keyword') ?? '', { emitEvent: false });
       this.search();
     });
-    this.loadBids();
   }
 
   loadBids() {
+    this.listRequest?.unsubscribe();
+    const { keyword, awardDateFrom, awardDateTo } = this.filters();
+    this.bids.set([]);
     this.loading.set(true);
     this.error.set('');
-    this.service
-      .findAll()
+    this.listRequest = this.service
+      .findAll(keyword, awardDateFrom, awardDateTo)
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.loading.set(false)),
@@ -230,29 +210,75 @@ export class Bids implements OnInit {
       });
   }
 
-  search() {
-    const value = this.searchForm.getRawValue();
-    const previous = this.filters();
-    if (
-      value.awardDateFrom !== previous.awardDateFrom ||
-      value.awardDateTo !== previous.awardDateTo
-    ) {
-      this.activePreset.set(value.awardDateFrom || value.awardDateTo ? 'custom' : 'all');
-    }
-    this.filters.set(value);
-    this.page.set(1);
+  exportExcel() {
+    if (this.exporting() || this.loading() || this.error()) return;
+
+    const { keyword, awardDateFrom, awardDateTo } = this.filters();
+    this.exporting.set(true);
+    this.exportError.set('');
+
+    this.service
+      .exportExcel(keyword, awardDateFrom, awardDateTo)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.exporting.set(false)),
+      )
+      .subscribe({
+        next: (file) => {
+          try {
+            this.downloadExcel(file);
+          } catch {
+            this.exportError.set('無法開始下載 Excel，請稍後再試。');
+          }
+        },
+        error: () => this.exportError.set('匯出 Excel 失敗，請稍後再試。'),
+      });
   }
 
-  selectDatePreset(preset: Exclude<DatePreset, 'custom'>) {
-    const { from, to } = awardDateRange(preset);
-    this.searchForm.patchValue({ awardDateFrom: from, awardDateTo: to });
+  search(includeKeyword = true) {
+    const value = this.searchForm.getRawValue();
+    // 日期變更只套用日期，關鍵字需按搜尋才正式套用。
+    if (!includeKeyword) value.keyword = this.filters().keyword;
+    if (
+      value.awardDateFrom &&
+      value.awardDateTo &&
+      value.awardDateFrom > value.awardDateTo
+    ) {
+      this.searchError.set('決標日期起日不可晚於迄日');
+      return;
+    }
+    this.searchError.set('');
+
+    let preset = this.activePreset();
+    if (preset !== 'custom') {
+      const range = datePresetRange(preset);
+      if (value.awardDateFrom !== range.from || value.awardDateTo !== range.to) {
+        preset = 'custom';
+      }
+    }
+    if (!value.awardDateFrom && !value.awardDateTo) preset = 'all';
+
+    this.filters.set(value);
     this.activePreset.set(preset);
+    this.appliedPreset.set(preset);
+    this.page.set(1);
+    this.loadBids();
+  }
+
+  onDateRangeChange({ from, to, preset }: DateRangeSelection) {
+    this.searchForm.patchValue(
+      { awardDateFrom: from, awardDateTo: to },
+      { emitEvent: false },
+    );
+    this.activePreset.set(preset);
+    this.searchError.set('');
+    this.search(false);
   }
 
   resetSearch() {
-    this.searchForm.reset();
-    this.search();
+    this.searchForm.reset({}, { emitEvent: false });
     this.activePreset.set('all');
+    this.searchError.set('');
   }
 
   openCreate() {
@@ -320,14 +346,14 @@ export class Bids implements OnInit {
         finalize(() => this.saving.set(false)),
       )
       .subscribe({
-        next: (saved) => {
-          this.bids.update((items) =>
-            editing
-              ? items.map((item) => (item.id === saved.id ? saved : item))
-              : [saved, ...items],
-          );
-          if (!editing) this.resetSearch();
+        next: () => {
           this.editor().nativeElement.close();
+          if (editing) {
+            this.loadBids();
+          } else {
+            this.resetSearch();
+            this.search();
+          }
         },
         error: (error: HttpErrorResponse) => this.formError.set(this.errorMessage(error)),
       });
@@ -355,9 +381,26 @@ export class Bids implements OnInit {
           this.bids.update((items) => items.filter((entry) => entry.id !== item.id));
           this.page.set(this.currentPage());
           this.deleteDialog().close();
+          this.loadBids();
         },
         error: (error: HttpErrorResponse) => this.deleteError.set(this.errorMessage(error)),
       });
+  }
+
+  private downloadExcel(file: Blob) {
+    const url = URL.createObjectURL(file);
+    const link = document.createElement('a');
+
+    try {
+      link.href = url;
+      link.download = '台塑案件.xlsx';
+      document.body.appendChild(link);
+      link.click();
+    } finally {
+      link.remove();
+      // 讓瀏覽器先處理下載，再釋放暫時網址。
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
   }
 
   private errorMessage(error: HttpErrorResponse): string {
@@ -384,30 +427,4 @@ export function quantityPrecisionValidator(control: AbstractControl) {
   return !Number.isFinite(value) || Math.abs(value) >= 1e13 || decimalPlaces > 6
     ? { quantityPrecision: true }
     : null;
-}
-
-// 以台灣日期計算快捷區間；本週從星期一開始，區間包含完整的一週／月份。
-export function awardDateRange(preset: Exclude<DatePreset, 'custom'>, now = new Date()) {
-  if (preset === 'all') return { from: '', to: '' };
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Taipei',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(now);
-  const part = (type: string) => parts.find((p) => p.type === type)!.value;
-  const start = new Date(`${part('year')}-${part('month')}-${part('day')}T12:00:00Z`);
-  const end = new Date(start);
-  if (preset === 'yesterday') {
-    start.setUTCDate(start.getUTCDate() - 1);
-    end.setTime(start.getTime());
-  } else if (preset === 'week') {
-    start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7));
-    end.setTime(start.getTime());
-    end.setUTCDate(end.getUTCDate() + 6);
-  } else if (preset === 'month') {
-    start.setUTCDate(1);
-    end.setUTCMonth(end.getUTCMonth() + 1, 0);
-  }
-  return { from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) };
 }

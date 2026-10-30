@@ -20,14 +20,13 @@ import {
   LucideFileInput,
   LucideFileCheck,
 } from '@lucide/angular';
-import { BidService } from '../bid.service';
-import { BidNotice } from '../bid.model';
-import { GovernmentBidService } from '../government-bids/government-bid.service';
-import { governmentBidFields } from '../government-bids/government-bid.model';
+import { BidNotice } from './government-bid.model';
+import { GovernmentBidService } from './government-bid.service';
+import { governmentBidFields } from './government-bid.model';
 import {
   createGovernmentBidForm,
   toGovernmentBidRequest,
-} from '../government-bids/government-bid.form';
+} from './government-bid.form';
 
 @Component({
   selector: 'app-bid-import',
@@ -45,8 +44,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BidImport {
-  private readonly service = inject(BidService);
-  private readonly governmentService = inject(GovernmentBidService);
+  private readonly service = inject(GovernmentBidService);
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');
@@ -159,7 +157,7 @@ export class BidImport {
     if (this.detailForm.invalid) return;
     this.saving.set(true);
     this.saveError.set('');
-    this.governmentService
+    this.service
       .create(toGovernmentBidRequest(this.detailForm.getRawValue()))
       .pipe(
         takeUntilDestroyed(this.destroyRef),

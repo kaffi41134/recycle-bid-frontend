@@ -1,0 +1,32 @@
+<span class="date-filter-label">{{ label() }}</span>
+<div class="date-presets">
+  @for (preset of presets; track preset.key) {
+    <button
+      type="button"
+      class="button button-date-preset"
+      [class.preset-active]="activePreset() === preset.key"
+      (click)="selectPreset(preset.key)"
+    >
+      {{ preset.label }}
+    </button>
+  }
+</div>
+<div class="date-range text-[13px] text-slate-600">
+  <input
+    type="date"
+    class="select-input input-control"
+    [attr.aria-label]="label() + '起日'"
+    [value]="from()"
+    (change)="changeDate('from', $event)"
+    [max]="to()"
+  />
+  <span>至</span>
+  <input
+    type="date"
+    class="select-input input-control"
+    [attr.aria-label]="label() + '迄日'"
+    [value]="to()"
+    (change)="changeDate('to', $event)"
+    [min]="from()"
+  />
+</div>

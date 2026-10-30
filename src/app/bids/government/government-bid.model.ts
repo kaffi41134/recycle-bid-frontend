@@ -43,3 +43,39 @@ export const governmentBidFields = [
   { key: 'performanceLocation', label: '履約地點' },
   { key: 'sourceUrl', label: '政府標案公告網址' },
 ] as const satisfies readonly { key: keyof GovernmentBidRequest; label: string }[];
+
+// 政府公告查詢與匯入使用的資料型別。
+export interface BidNoticeRequest {
+  unitId: string;
+  jobNumber: string;
+}
+
+export interface BidNotice extends BidNoticeRequest {
+  noticeDate: string;
+  noticeType: string | null;
+  title: string | null;
+  filename: string;
+}
+
+export interface BidDetailRequest extends BidNoticeRequest {
+  noticeDate: string;
+  filename: string;
+}
+
+export interface BidImportDetail extends BidNoticeRequest {
+  unitName: string | null;
+  title: string | null;
+  noticeDate: string | null;
+  noticeType: string | null;
+  category: string | null;
+  tenderMethod: string | null;
+  deadline: string | null;
+  openingTime: string | null;
+  openingLocation: string | null;
+  contactName: string | null;
+  contactPhone: string | null;
+  budgetAmount: string | null;
+  bidBondRequired: string | null;
+  performanceLocation: string | null;
+  sourceUrl: string | null;
+}

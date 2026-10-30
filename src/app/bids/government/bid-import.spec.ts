@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { FormControlName } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BidImport } from './bid-import';
-import { BidImportDetail, BidNotice } from '../bid.model';
+import { BidImportDetail, BidNotice } from './government-bid.model';
 
 const notice: BidNotice = {
   unitId: '3.7',

@@ -72,9 +72,9 @@ Controller 測試使用 MockMvc 與模擬 Service；時間測試驗證 DTO 映�
 從左側「投標案件管理」進入 `/bids`。沿用既有頁面樣式，提供列表、全欄位關鍵字搜尋、
 前端分頁、新增／編輯表單與刪除確認視窗。寬表格可左右捲動，操作欄固定於右側。
 
-- `src/app/bids/bids.*`：案件列表、表單、互動與測試。
-- `src/app/bids/bid.model.ts`：對應目前後端 `BidReq`／`BidRes`。
-- `src/app/bids/bid.service.ts`：串接 `/api/bids` 的 GET、POST、PUT、DELETE。
+- `src/app/bids/formosa/bids.*`：案件列表、表單、互動與測試。
+- `src/app/bids/formosa/bid.model.ts`：對應目前後端 `BidReq`／`BidRes`。
+- `src/app/bids/formosa/bid.service.ts`：串接 `/api/bids` 的 GET、POST、PUT、DELETE。
 
 標售案號依目前後端契約為必填輸入；其餘欄位選填，空白以 null 傳送。
 數量允許小數，零保留為零。兩個日期皆填寫時，截止日不得早於通知日；同日允許。
@@ -88,7 +88,7 @@ Controller 測試使用 MockMvc 與模擬 Service；時間測試驗證 DTO 映�
 `POST /api/bids/import/notices`。點選公告列或「帶入明細」，使用該筆回應的
 `unitId`、`jobNumber`、`noticeDate` 與 `filename` 呼叫 `POST /api/bids/import/detail`。
 
-`src/app/bids/bid-import/` 為獨立查詢元件，將明細回應的全部 17 個欄位帶入可編輯欄位。
+`src/app/bids/government/bid-import.*` 為獨立查詢元件，將明細回應的全部 17 個欄位帶入可編輯欄位。
 日期、時間與金額保留第三方原始字串，缺漏值呈現空白。切換公告、重新查詢或關閉視窗
 會取消尚未完成的請求，避免舊回應覆蓋新資料；查詢與明細失敗均可重試。
 
@@ -99,8 +99,10 @@ HTTP 模擬測試涵蓋完整欄位帶入、公告識別、取消過期請求、
 
 ## 政府與企業案件
 
-`/bids` 使用「企業案件」與「政府標案」頁籤，兩份資料各自查詢、搜尋及分頁。
-企業案件繼續使用 `/api/bids`，政府案件由獨立元件 `src/app/bids/government-bids/` 管理。
+台塑案件與政府標案分別使用 `/bids`、`/government-bids` 路由，兩份資料各自查詢、搜尋及分頁。
+前端依功能分為 `src/app/bids/formosa/` 與 `src/app/bids/government/`，公告匯入元件直接放在 `government/`。
+台塑案件繼續使用 `/api/bids`，政府案件使用 `/api/government-bids`；公告查詢仍使用 `/api/bids/import/*`。
+公告查詢方法與相關型別歸在政府案件的 service、model，兩頁共用編輯視窗樣式放在 `src/styles.css`。
 
 | 方法   | 政府案件路徑                | 用途／回應           |
 | ------ | --------------------------- | -------------------- |

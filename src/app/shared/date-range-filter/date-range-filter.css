@@ -1,0 +1,48 @@
+:host {
+  display: contents;
+}
+
+.date-presets,
+.date-range {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.date-filter-label {
+  display: none;
+}
+.date-range {
+  gap: 8px;
+}
+.button-date-preset {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #dce3df;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 12px;
+}
+.button-date-preset:hover {
+  background: #f3f8f5;
+}
+.button-date-preset.preset-active {
+  border-color: #aad1b8;
+  background: #eaf5ee;
+  color: #17613d;
+}
+.date-range .input-control {
+  width: 140px;
+  min-width: 0;
+  padding: 0 8px;
+}
+@media (min-width: 1200px) {
+  .date-filter-label {
+    display: inline;
+    color: #64748b;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}

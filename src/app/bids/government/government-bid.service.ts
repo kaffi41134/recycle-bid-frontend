@@ -1,11 +1,28 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { GovernmentBid, GovernmentBidRequest } from './government-bid.model';
+import {
+  GovernmentBid,
+  GovernmentBidRequest,
+  BidNoticeRequest,
+  BidNotice,
+  BidDetailRequest,
+  BidImportDetail,
+} from './government-bid.model';
 
 @Injectable({ providedIn: 'root' })
 export class GovernmentBidService {
   private readonly http = inject(HttpClient);
   private readonly url = '/api/government-bids';
+  private readonly importUrl = '/api/bids/import';
+
+  // 保留既有政府公告查詢 API。
+  findNotices(request: BidNoticeRequest) {
+    return this.http.post<BidNotice[]>(`${this.importUrl}/notices`, request);
+  }
+
+  findNoticeDetail(request: BidDetailRequest) {
+    return this.http.post<BidImportDetail>(`${this.importUrl}/detail`, request);
+  }
 
   findAll(createdDateFrom = '', createdDateTo = '') {
     const params: Record<string, string> = {};

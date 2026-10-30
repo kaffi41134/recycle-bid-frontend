@@ -82,6 +82,20 @@ button:disabled {
   backdrop-filter: blur(3px);
 }
 
+/* 台塑與政府案件共用的編輯視窗。 */
+.form-dialog.bid-editor {
+  --form-dialog-width: 760px;
+  width: min(684px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+}
+.form-dialog.bid-editor::backdrop {
+  background: #203c3380;
+  backdrop-filter: none;
+}
+
 .input-control {
   box-sizing: border-box;
   height: 36px;
@@ -237,6 +251,9 @@ button:disabled {
   .button-secondary svg,
   .button-danger svg {
     @apply size-[17px];
+  }
+  .button-small {
+    @apply min-h-9 min-w-0 border border-transparent px-3 text-xs;
   }
   .button-primary {
     @apply bg-primary text-white hover:bg-primary-hover;

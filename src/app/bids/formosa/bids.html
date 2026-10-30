@@ -17,6 +17,14 @@
     <div class="flex flex-wrap gap-3">
       <button
         type="button"
+        class="button button-secondary"
+        [disabled]="loading() || exporting() || !!error()"
+        (click)="exportExcel()"
+      >
+        <svg lucideDownload [size]="16"></svg>{{ exporting() ? '匯出中…' : '匯出 Excel' }}
+      </button>
+      <button
+        type="button"
         class="button button-primary"
         [disabled]="loading() || !!error()"
         (click)="openCreate()"
@@ -28,8 +36,8 @@
 
   <section [attr.aria-busy]="loading()">
     <form class="bid-filters" [formGroup]="searchForm" (ngSubmit)="search()">
-      <div class="filter-search-row">
-        <div class="search-box input-control">
+      <div class="filter-search-row flex items-center gap-2">
+        <div class="search-box input-control flex-1">
           <svg lucideSearch [size]="17"></svg>
           <input
             type="search"
@@ -37,40 +45,20 @@
             placeholder="搜尋標售案號、材料或提貨地點"
           />
         </div>
+        <button type="submit" class="button button-primary button-small" [disabled]="loading()">
+          <svg lucideSearch [size]="16"></svg>{{ loading() ? '搜尋中…' : '搜尋' }}
+        </button>
       </div>
       <div class="filter-date-row">
-        <span class="date-filter-label">決標日</span>
-        <div class="date-presets">
-          @for (preset of datePresets; track preset.key) {
-            <button
-              type="button"
-              class="button button-date-preset"
-              [class.preset-active]="activePreset() === preset.key"
-              (click)="selectDatePreset(preset.key)"
-            >
-              {{ preset.label }}
-            </button>
-          }
-        </div>
-        <div class="date-range text-[13px] text-slate-600">
-          <input
-            type="date"
-            class="select-input input-control"
-            aria-label="決標日起日"
-            formControlName="awardDateFrom"
-            [max]="searchForm.controls.awardDateTo.value"
-          />
-          <span>至</span>
-          <input
-            type="date"
-            class="select-input input-control"
-            aria-label="決標日迄日"
-            formControlName="awardDateTo"
-            [min]="searchForm.controls.awardDateFrom.value"
-          />
-        </div>
+        <app-date-range-filter
+          label="決標日"
+          [from]="searchForm.controls.awardDateFrom.value"
+          [to]="searchForm.controls.awardDateTo.value"
+          [activePreset]="activePreset()"
+          (rangeChange)="onDateRangeChange($event)"
+        />
         <div class="date-filter-actions">
-          <button type="button" class="button button-secondary" (click)="resetSearch()">
+          <button type="button" class="button button-secondary button-small" (click)="resetSearch()">
             <svg lucideRotateCw [size]="16"></svg>重設
           </button>
           <p class="filter-result">
@@ -81,6 +69,9 @@
     </form>
     @if (searchError()) {
       <p class="mb-4 text-sm text-red-600">{{ searchError() }}</p>
+    }
+    @if (exportError()) {
+      <p class="mb-4 text-sm text-red-600">{{ exportError() }}</p>
     }
 
     <div class="table-panel report-panel">
